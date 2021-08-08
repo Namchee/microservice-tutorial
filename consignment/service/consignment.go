@@ -14,13 +14,13 @@ type service struct {
 }
 
 type Service interface {
-	CreateConsignments(context.Context, *pb.Consignment) (*pb.Response, error)
+	CreateConsignment(context.Context, *pb.Consignment) (*pb.Response, error)
 	GetAll(context.Context, *pb.GetRequest) (*pb.Response, error)
 }
 
-func NewService(logger log.Logger) *service {
+func NewService(repo repository.Repository, logger log.Logger) *service {
 	return &service{
-		repo:   repository.NewRepository(),
+		repo:   repo,
 		logger: logger,
 	}
 }

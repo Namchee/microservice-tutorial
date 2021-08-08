@@ -24,7 +24,7 @@ func makeCreateConsignmentEndpoint(svc service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req, _ := request.(pb.Consignment)
 
-		result, serviceError := svc.CreateConsignments(ctx, &req)
+		result, serviceError := svc.CreateConsignment(ctx, &req)
 
 		if serviceError != nil {
 			return nil, serviceError
@@ -36,9 +36,9 @@ func makeCreateConsignmentEndpoint(svc service.Service) endpoint.Endpoint {
 
 func makeGetAllEndpoint(svc service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		req, _ := request.(pb.Consignment)
+		req, _ := request.(pb.GetRequest)
 
-		result, serviceError := svc.CreateConsignments(ctx, &req)
+		result, serviceError := svc.GetAll(ctx, &req)
 
 		if serviceError != nil {
 			return nil, serviceError

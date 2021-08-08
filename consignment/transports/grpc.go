@@ -1,9 +1,10 @@
-package transport
+package transports
 
 import (
 	"context"
 	"errors"
-	"log"
+
+	"github.com/go-kit/kit/log"
 
 	endpoints "github.com/Namchee/microservice-tutorial/consignment/endpoints"
 	"github.com/Namchee/microservice-tutorial/consignment/pb"
