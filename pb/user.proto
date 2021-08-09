@@ -1,0 +1,33 @@
+syntax = "proto3";
+option go_package = "./pb";
+
+package protobuf;
+
+service UserService {
+    rpc CreateUser(CreateUserRequest) returns (User) {};
+    rpc GetUsers(GetAllUsersRequest) returns (GetAllUsersResponse) {};
+    rpc GetUserById(GetUserByIdRequest) returns (User) {};
+}
+
+message User {
+    int32 id = 1;
+    string username = 2;
+    string name = 3;
+    string bio = 4;
+}
+
+message CreateUserRequest {
+    string username = 1;
+    string name = 2;
+    string bio = 3;
+}
+
+message GetAllUsersRequest {}
+
+message GetAllUsersResponse {
+    repeated User users = 1;
+}
+
+message GetUserByIdRequest {
+    int32 id = 1;
+}

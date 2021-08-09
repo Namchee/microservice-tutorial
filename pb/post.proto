@@ -1,0 +1,31 @@
+syntax = "proto3";
+option go_package = "./pb";
+
+package protobuf;
+
+service ThreadService {
+    rpc CreatePost(CreatePostRequest) returns (Post) {};
+    rpc GetAllPosts(GetAllPostsRequest) returns (GetAllPostsResponse) {};
+    rpc GetPostById(GetPostByIdRequest) returns (Post) {};
+}
+
+message Post {
+    int32 id = 1;
+    string text = 2;
+    int32 user = 3;
+}
+
+message CreatePostRequest {
+    string post = 1;
+    int32 user = 2;
+}
+
+message GetAllPostsRequest {}
+
+message GetAllPostsResponse {
+    repeated Post posts = 1;
+}
+
+message GetPostByIdRequest {
+    int32 id = 1;
+}
