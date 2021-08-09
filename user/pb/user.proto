@@ -5,7 +5,7 @@ package protobuf;
 
 service UserService {
     rpc CreateUser(CreateUserRequest) returns (User) {};
-    rpc GetUsers(GetAllUsersRequest) returns (GetAllUsersResponse) {};
+    rpc GetUsers(GetUsersRequest) returns (GetUsersResponse) {};
     rpc GetUserById(GetUserByIdRequest) returns (User) {};
 }
 
@@ -22,9 +22,9 @@ message CreateUserRequest {
     string bio = 3;
 }
 
-message GetAllUsersRequest {}
+message GetUsersRequest {}
 
-message GetAllUsersResponse {
+message GetUsersResponse {
     repeated User users = 1;
 }
 
