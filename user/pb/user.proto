@@ -22,7 +22,10 @@ message CreateUserRequest {
     string bio = 3;
 }
 
-message GetUsersRequest {}
+message GetUsersRequest {
+    int32 offset = 1;
+    int32 limit = 2;
+}
 
 message GetUsersResponse {
     repeated User users = 1;

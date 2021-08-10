@@ -2,8 +2,9 @@ package endpoints
 
 import (
 	"context"
+	"reflect"
 
-	"github.com/Namchee/microservice-tutorial/user/pb"
+	"github.com/Namchee/microservice-tutorial/user/entity"
 	"github.com/Namchee/microservice-tutorial/user/service"
 	"github.com/go-kit/kit/endpoint"
 )
@@ -24,7 +25,7 @@ func NewUserEndpoint(svc service.UserService) *UserEndpoints {
 
 func makeGetUsersEndpoint(svc service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(*pb.GetUsersRequest)
+		req := request.(*entity.Pagination)
 		result, err := svc.GetUsers(ctx, req)
 
 		if err != nil {
@@ -37,8 +38,10 @@ func makeGetUsersEndpoint(svc service.UserService) endpoint.Endpoint {
 
 func makeGetUserByIdEndpoint(svc service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(*pb.GetUserByIdRequest)
-		result, err := svc.GetUserById(ctx, req)
+		reflection := reflect.ValueOf(request).Elem()
+		id := reflection.FieldByName("id").Interface().(int)
+
+		result, err := svc.GetUserById(ctx, id)
 
 		if err != nil {
 			return nil, err
@@ -50,7 +53,7 @@ func makeGetUserByIdEndpoint(svc service.UserService) endpoint.Endpoint {
 
 func makeCreateUserEndpoint(svc service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(*pb.CreateUserRequest)
+		req := request.(*entity.User)
 		result, err := svc.CreateUser(ctx, req)
 
 		if err != nil {

@@ -34,6 +34,7 @@ func main() {
 
 	if err != nil {
 		logger.Log("during", "db", "err", err)
+		os.Exit(1)
 	}
 
 	repository := repository.NewPgUserRepository(db)

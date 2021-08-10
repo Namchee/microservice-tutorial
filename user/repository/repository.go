@@ -3,11 +3,11 @@ package repository
 import (
 	"context"
 
-	pb "github.com/Namchee/microservice-tutorial/user/pb"
+	"github.com/Namchee/microservice-tutorial/user/entity"
 )
 
 type UserRepository interface {
-	GetUsers(context.Context, *pb.GetUsersRequest) ([]*pb.User, error)
-	GetUserById(context.Context, int32) (*pb.User, error)
-	CreateUser(context.Context, *pb.CreateUserRequest) (*pb.User, error)
+	GetUsers(context.Context, *entity.Pagination) ([]*entity.User, error)
+	GetUserById(context.Context, int) (*entity.User, error)
+	CreateUser(context.Context, *entity.User) (*entity.User, error)
 }

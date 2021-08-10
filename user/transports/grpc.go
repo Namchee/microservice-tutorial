@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Namchee/microservice-tutorial/user/endpoints"
+	"github.com/Namchee/microservice-tutorial/user/entity"
 	"github.com/Namchee/microservice-tutorial/user/pb"
 	gt "github.com/go-kit/kit/transport/grpc"
 )
@@ -60,33 +61,65 @@ func (s *gRPCServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) 
 
 func decodeGetUsersRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(*pb.GetUsersRequest)
-	return req, nil
+
+	return &entity.Pagination{
+		Limit:  int(req.Limit),
+		Offset: int(req.Offset),
+	}, nil
 }
 
 func encodeGetUsersResponse(_ context.Context, response interface{}) (interface{}, error) {
-	res := response.(*pb.GetUsersResponse)
+	res := response.([]*entity.User)
 
-	return res, nil
+	var users []*pb.User
+
+	for _, val := range res {
+		pbUser := &pb.User{
+			Id:       int32(val.Id),
+			Username: val.Username,
+			Name:     val.Name,
+			Bio:      val.Bio,
+		}
+
+		users = append(users, pbUser)
+	}
+
+	return users, nil
 }
 
 func decodeGetUserByIdRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(*pb.GetUserByIdRequest)
-	return req, nil
+	return req.Id, nil
 }
 
 func encodeGetUserByIdResponse(_ context.Context, response interface{}) (interface{}, error) {
-	res := response.(*pb.User)
+	res := response.(*entity.User)
 
-	return res, nil
+	return &pb.User{
+		Id:       int32(res.Id),
+		Username: res.Username,
+		Name:     res.Name,
+		Bio:      res.Bio,
+	}, nil
 }
 
 func decodeCreateUserRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(*pb.CreateUserRequest)
-	return req, nil
+
+	return &entity.User{
+		Username: req.Username,
+		Name:     req.Name,
+		Bio:      req.Bio,
+	}, nil
 }
 
 func encodeCreateUserResponse(_ context.Context, response interface{}) (interface{}, error) {
-	res := response.(*pb.User)
+	res := response.(*entity.User)
 
-	return res, nil
+	return &pb.User{
+		Id:       int32(res.Id),
+		Username: res.Username,
+		Name:     res.Name,
+		Bio:      res.Bio,
+	}, nil
 }

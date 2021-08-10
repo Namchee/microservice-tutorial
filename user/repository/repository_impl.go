@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/Namchee/microservice-tutorial/user/pb"
+	"github.com/Namchee/microservice-tutorial/user/entity"
 )
 
 const (
@@ -23,7 +23,7 @@ func NewPgUserRepository(db *sql.DB) *pgUserRepository {
 	}
 }
 
-func (repo *pgUserRepository) GetUsers(ctx context.Context, _ *pb.GetUsersRequest) ([]*pb.User, error) {
+func (repo *pgUserRepository) GetUsers(ctx context.Context, _ *entity.Pagination) ([]*entity.User, error) {
 	rows, err := repo.db.QueryContext(
 		ctx,
 		getAllQuery,
@@ -35,9 +35,9 @@ func (repo *pgUserRepository) GetUsers(ctx context.Context, _ *pb.GetUsersReques
 
 	defer rows.Close()
 
-	var users []*pb.User
+	var users []*entity.User
 	for rows.Next() {
-		var user *pb.User
+		var user *entity.User
 
 		if err = rows.Scan(&user.Id, &user.Username, &user.Name, &user.Bio); err != nil {
 			return nil, err
@@ -49,14 +49,14 @@ func (repo *pgUserRepository) GetUsers(ctx context.Context, _ *pb.GetUsersReques
 	return users, nil
 }
 
-func (repo *pgUserRepository) GetUserById(ctx context.Context, id int32) (*pb.User, error) {
+func (repo *pgUserRepository) GetUserById(ctx context.Context, id int) (*entity.User, error) {
 	row := repo.db.QueryRowContext(
 		ctx,
 		getByIdQuery,
 		id,
 	)
 
-	var user *pb.User
+	var user *entity.User
 
 	if row != nil {
 		row.Scan(&user.Id, &user.Username, &user.Name, &user.Bio)
@@ -67,25 +67,25 @@ func (repo *pgUserRepository) GetUserById(ctx context.Context, id int32) (*pb.Us
 	return nil, nil
 }
 
-func (repo *pgUserRepository) CreateUser(ctx context.Context, data *pb.CreateUserRequest) (*pb.User, error) {
-	var id int32
+func (repo *pgUserRepository) CreateUser(ctx context.Context, user *entity.User) (*entity.User, error) {
+	var id int
 
 	err := repo.db.QueryRowContext(
 		ctx,
 		createQuery,
-		data.Username,
-		data.Name,
-		data.Bio,
+		user.Username,
+		user.Name,
+		user.Bio,
 	).Scan(&id)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.User{
+	return &entity.User{
 		Id:       id,
-		Username: data.Username,
-		Name:     data.Name,
-		Bio:      data.Bio,
+		Username: user.Username,
+		Name:     user.Name,
+		Bio:      user.Bio,
 	}, nil
 }
