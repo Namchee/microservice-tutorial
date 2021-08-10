@@ -15,7 +15,7 @@ type PostEndpoints struct {
 	CreatePost  endpoint.Endpoint
 }
 
-func NewUserEndpoint(svc service.PostService) *PostEndpoints {
+func NewPostEndpoint(svc service.PostService) *PostEndpoints {
 	return &PostEndpoints{
 		GetPosts:    makeGetPostsEndpoint(svc),
 		GetPostById: makeGetPostByIdEndpoint(svc),
