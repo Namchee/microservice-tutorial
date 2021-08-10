@@ -2,7 +2,6 @@ version: "3"
 services: 
   postgres:
     image: postgres:latest
-    container_name: microservice-tutorial-db
     volumes:
       - ./postgres-multiple-db:/docker-entrypoint-initdb.d
     ports: 
@@ -12,7 +11,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_MULTIPLE_DATABASES=user,namchee:thread,namchee:post,namchee
   user:
-    build: ./user/Dockerfile
+    build: ./user
     ports:
       - "50051:50051"
     environment:
@@ -21,4 +20,5 @@ services:
       - DB_HOST=user
       - DB_PORT=5432
       - DB_NAME=user
-    depends_on: postgres
+    depends_on:
+      - postgres

@@ -8,11 +8,6 @@ import (
 	"github.com/go-kit/kit/endpoint"
 )
 
-type Response struct {
-	Data  interface{}
-	Error error
-}
-
 type UserEndpoints struct {
 	GetUsers    endpoint.Endpoint
 	GetUserById endpoint.Endpoint
@@ -33,16 +28,10 @@ func makeGetUsersEndpoint(svc service.UserService) endpoint.Endpoint {
 		result, err := svc.GetUsers(ctx, req)
 
 		if err != nil {
-			return &Response{
-				Data:  nil,
-				Error: err,
-			}, nil
+			return nil, err
 		}
 
-		return &Response{
-			Data:  result,
-			Error: nil,
-		}, nil
+		return result, nil
 	}
 }
 
@@ -52,16 +41,10 @@ func makeGetUserByIdEndpoint(svc service.UserService) endpoint.Endpoint {
 		result, err := svc.GetUserById(ctx, req)
 
 		if err != nil {
-			return &Response{
-				Data:  nil,
-				Error: err,
-			}, nil
+			return nil, err
 		}
 
-		return &Response{
-			Data:  result,
-			Error: nil,
-		}, nil
+		return result, nil
 	}
 }
 
@@ -71,15 +54,9 @@ func makeCreateUserEndpoint(svc service.UserService) endpoint.Endpoint {
 		result, err := svc.CreateUser(ctx, req)
 
 		if err != nil {
-			return &Response{
-				Data:  nil,
-				Error: err,
-			}, nil
+			return nil, err
 		}
 
-		return &Response{
-			Data:  result,
-			Error: nil,
-		}, nil
+		return result, nil
 	}
 }

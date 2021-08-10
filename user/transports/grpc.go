@@ -39,7 +39,7 @@ func (s *gRPCServer) GetUsers(ctx context.Context, req *pb.GetUsersRequest) (*pb
 	if err != nil {
 		return nil, err
 	}
-	return &pb.GetUsersResponse{Users: resp.([]*pb.User)}, nil
+	return resp.(*pb.GetUsersResponse), nil
 }
 
 func (s *gRPCServer) GetUserById(ctx context.Context, req *pb.GetUserByIdRequest) (*pb.User, error) {
@@ -64,13 +64,9 @@ func decodeGetUsersRequest(_ context.Context, request interface{}) (interface{},
 }
 
 func encodeGetUsersResponse(_ context.Context, response interface{}) (interface{}, error) {
-	res := response.(endpoints.Response)
+	res := response.(*pb.GetUsersResponse)
 
-	if res.Error != nil {
-		return nil, res.Error
-	}
-
-	return res.Data.([]*pb.User), nil
+	return res, nil
 }
 
 func decodeGetUserByIdRequest(_ context.Context, request interface{}) (interface{}, error) {
@@ -79,13 +75,9 @@ func decodeGetUserByIdRequest(_ context.Context, request interface{}) (interface
 }
 
 func encodeGetUserByIdResponse(_ context.Context, response interface{}) (interface{}, error) {
-	res := response.(endpoints.Response)
+	res := response.(*pb.User)
 
-	if res.Error != nil {
-		return nil, res.Error
-	}
-
-	return res.Data.(*pb.User), nil
+	return res, nil
 }
 
 func decodeCreateUserRequest(_ context.Context, request interface{}) (interface{}, error) {
@@ -94,11 +86,7 @@ func decodeCreateUserRequest(_ context.Context, request interface{}) (interface{
 }
 
 func encodeCreateUserResponse(_ context.Context, response interface{}) (interface{}, error) {
-	res := response.(endpoints.Response)
+	res := response.(*pb.User)
 
-	if res.Error != nil {
-		return nil, res.Error
-	}
-
-	return res.Data.(*pb.User), nil
+	return res, nil
 }

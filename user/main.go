@@ -16,6 +16,8 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"google.golang.org/grpc"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -25,6 +27,8 @@ func main() {
 	logger = log.With(logger, "caller", log.DefaultCaller)
 
 	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
+
+	fmt.Println(connStr)
 
 	db, err := sql.Open("postgres", connStr)
 
