@@ -5,7 +5,7 @@ package protobuf;
 
 service ThreadService {
     rpc CreatePost(CreatePostRequest) returns (Post) {};
-    rpc GetAllPosts(GetAllPostsRequest) returns (GetAllPostsResponse) {};
+    rpc GetPosts(GetPostsRequest) returns (GetPostsResponse) {};
     rpc GetPostById(GetPostByIdRequest) returns (Post) {};
 }
 
@@ -20,9 +20,9 @@ message CreatePostRequest {
     int32 user = 2;
 }
 
-message GetAllPostsRequest {}
+message GetPostsRequest {}
 
-message GetAllPostsResponse {
+message GetPostsResponse {
     repeated Post posts = 1;
 }
 
