@@ -9,17 +9,17 @@ import (
 	"github.com/go-kit/kit/endpoint"
 )
 
-type UserEndpoints struct {
-	GetUsers    endpoint.Endpoint
-	GetUserById endpoint.Endpoint
-	CreateUser  endpoint.Endpoint
+type PostEndpoints struct {
+	GetPosts    endpoint.Endpoint
+	GetPostById endpoint.Endpoint
+	CreatePost  endpoint.Endpoint
 }
 
-func NewUserEndpoint(svc service.PostService) *UserEndpoints {
-	return &UserEndpoints{
-		GetUsers:    makeGetPostsEndpoint(svc),
-		GetUserById: makeGetPostByIdEndpoint(svc),
-		CreateUser:  makeCreatePostEndpoint(svc),
+func NewUserEndpoint(svc service.PostService) *PostEndpoints {
+	return &PostEndpoints{
+		GetPosts:    makeGetPostsEndpoint(svc),
+		GetPostById: makeGetPostByIdEndpoint(svc),
+		CreatePost:  makeCreatePostEndpoint(svc),
 	}
 }
 
