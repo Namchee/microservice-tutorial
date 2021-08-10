@@ -17,7 +17,7 @@ type pgUserRepository struct {
 	db *sql.DB
 }
 
-func NewPgUserRepository(db *sql.DB) *pgUserRepository {
+func NewPgUserRepository(db *sql.DB) UserRepository {
 	return &pgUserRepository{
 		db: db,
 	}

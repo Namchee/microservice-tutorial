@@ -9,7 +9,7 @@ services:
     environment: 
       - POSTGRES_USER=namchee
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_MULTIPLE_DATABASES=user,namchee:thread,namchee:post,namchee
+      - POSTGRES_MULTIPLE_DATABASES=user,namchee:post,namchee
   user:
     build: ./user
     ports:
@@ -20,5 +20,17 @@ services:
       - DB_HOST=user
       - DB_PORT=5432
       - DB_NAME=user
+    depends_on:
+      - postgres
+  post:
+    build: ./post
+    ports:
+      - "50052:50051"
+    environment:
+      - DB_USER=namchee
+      - DB_PASSWORD=postgres
+      - DB_HOST=post
+      - DB_PORT=5432
+      - DB_NAME=post
     depends_on:
       - postgres
