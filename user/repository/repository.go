@@ -7,7 +7,7 @@ import (
 )
 
 type UserRepository interface {
-	GetUsers(context.Context, *pb.GetUsersRequest) (*pb.GetUsersResponse, error)
+	GetUsers(context.Context, *pb.GetUsersRequest) ([]*pb.User, error)
 	GetUserById(context.Context, int32) (*pb.User, error)
 	CreateUser(context.Context, *pb.CreateUserRequest) (*pb.User, error)
 }
