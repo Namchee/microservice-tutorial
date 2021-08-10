@@ -13,14 +13,14 @@ type Response struct {
 	Error error
 }
 
-type UserEndpoint struct {
+type UserEndpoints struct {
 	GetUsers    endpoint.Endpoint
 	GetUserById endpoint.Endpoint
 	CreateUser  endpoint.Endpoint
 }
 
-func NewUserEndpoint(svc service.UserService) *UserEndpoint {
-	return &UserEndpoint{
+func NewUserEndpoint(svc service.UserService) *UserEndpoints {
+	return &UserEndpoints{
 		GetUsers:    makeGetUsersEndpoint(svc),
 		GetUserById: makeGetUserByIdEndpoint(svc),
 		CreateUser:  makeCreateUserEndpoint(svc),

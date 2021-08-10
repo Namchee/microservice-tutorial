@@ -14,10 +14,10 @@ const (
 )
 
 type pgUserRepository struct {
-	db *sql.Conn
+	db *sql.DB
 }
 
-func NewPgUserRepository(db *sql.Conn) *pgUserRepository {
+func NewPgUserRepository(db *sql.DB) *pgUserRepository {
 	return &pgUserRepository{
 		db: db,
 	}
