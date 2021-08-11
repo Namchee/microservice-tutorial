@@ -1,15 +1,16 @@
 version: "3"
 services: 
   postgres:
-    image: postgres:latest
+    build: 
+      context: .
+      dockerfile: Dockerfile
     volumes:
-      - ./postgres-multiple-db:/docker-entrypoint-initdb.d
+      - db-data:/var/lib/postgresql/data
     ports: 
       - "5432:5432"
     environment: 
       - POSTGRES_USER=namchee
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_MULTIPLE_DATABASES=user,namchee:post,namchee
   user:
     build: ./user
     ports:
@@ -34,3 +35,7 @@ services:
       - DB_NAME=post
     depends_on:
       - postgres
+
+volumes:
+  db-data:
+    driver: local
