@@ -28,12 +28,10 @@ func main() {
 
 	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
 
-	fmt.Println(connStr)
-
 	db, err := sql.Open("postgres", connStr)
 
 	if err != nil {
-		logger.Log("during", "db", "err", err)
+		level.Error(logger).Log("failed to connect to database")
 		os.Exit(1)
 	}
 
@@ -51,7 +49,7 @@ func main() {
 
 	grpcListener, err := net.Listen("tcp", ":50051")
 	if err != nil {
-		logger.Log("during", "Listen", "err", err)
+		level.Error(logger).Log("failed to open grpc server")
 		os.Exit(1)
 	}
 
