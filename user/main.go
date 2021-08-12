@@ -37,12 +37,12 @@ func main() {
 
 	repository := repository.NewPgUserRepository(db)
 	userService := service.NewUserService(logger, repository)
-	userEndpoint := endpoints.NewUserEndpoint(userService)
+	userEndpoint := endpoints.NewUserEndpoint(logger, userService)
 	grpcServer := transports.NewGRPCServer(userEndpoint)
 
 	errs := make(chan error)
+	c := make(chan os.Signal)
 	go func() {
-		c := make(chan os.Signal)
 		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGALRM)
 		errs <- fmt.Errorf("%s", <-c)
 	}()

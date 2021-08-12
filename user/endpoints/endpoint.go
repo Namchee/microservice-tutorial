@@ -7,6 +7,7 @@ import (
 	"github.com/Namchee/microservice-tutorial/user/entity"
 	"github.com/Namchee/microservice-tutorial/user/service"
 	"github.com/go-kit/kit/endpoint"
+	"github.com/go-kit/kit/log"
 )
 
 type UserEndpoints struct {
@@ -15,11 +16,11 @@ type UserEndpoints struct {
 	CreateUser  endpoint.Endpoint
 }
 
-func NewUserEndpoint(svc service.UserService) *UserEndpoints {
+func NewUserEndpoint(logger log.Logger, svc service.UserService) *UserEndpoints {
 	return &UserEndpoints{
-		GetUsers:    makeGetUsersEndpoint(svc),
-		GetUserById: makeGetUserByIdEndpoint(svc),
-		CreateUser:  makeCreateUserEndpoint(svc),
+		GetUsers:    MakeGetUsersLoggingMiddleware(logger)(makeGetUsersEndpoint(svc)),
+		GetUserById: MakeGetUserByIdLoggingMiddleware(logger)(makeGetUserByIdEndpoint(svc)),
+		CreateUser:  MakeCreateUserLoggingMiddleware(logger)(makeCreateUserEndpoint(svc)),
 	}
 }
 
