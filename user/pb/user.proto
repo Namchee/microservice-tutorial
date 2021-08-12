@@ -23,8 +23,8 @@ message CreateUserRequest {
 }
 
 message GetUsersRequest {
-    int32 offset = 1;
-    int32 limit = 2;
+    optional int32 offset = 1;
+    optional int32 limit = 2;
 }
 
 message GetUsersResponse {

@@ -63,8 +63,8 @@ func decodeGetUsersRequest(_ context.Context, request interface{}) (interface{},
 	req := request.(*pb.GetUsersRequest)
 
 	return &entity.Pagination{
-		Limit:  int(req.Limit),
-		Offset: int(req.Offset),
+		Limit:  int(*req.Limit),
+		Offset: int(*req.Offset),
 	}, nil
 }
 
