@@ -36,32 +36,45 @@ func (repository *pgPostRepository) GetPosts(ctx context.Context, pagination *en
 	var posts []*entity.Post
 
 	for rows.Next() {
-		var post *entity.Post
+		var id int
+		var text string
+		var user int
 
-		rows.Scan(&post.Id, &post.Text, &post.User)
+		rows.Scan(&id, &text, &user)
 
-		posts = append(posts, post)
+		posts = append(posts, &entity.Post{
+			Id:   id,
+			Text: text,
+			User: user,
+		})
 	}
 
 	return posts, nil
 }
 
-func (repository *pgPostRepository) GetPostById(ctx context.Context, id int) (*entity.Post, error) {
+func (repository *pgPostRepository) GetPostById(ctx context.Context, queryId int) (*entity.Post, error) {
 	row := repository.db.QueryRowContext(
 		ctx,
 		getByIdQuery,
-		id,
+		queryId,
 	)
 
-	if row != nil {
-		var post *entity.Post
+	var id int
+	var text string
+	var user int
 
-		row.Scan(&post.Id, &post.Text, &post.User)
-
-		return post, nil
+	switch err := row.Scan(&id, &text, &user); err {
+	case sql.ErrNoRows:
+		return nil, nil
+	case nil:
+		return &entity.Post{
+			Id:   id,
+			Text: text,
+			User: user,
+		}, nil
+	default:
+		panic(err)
 	}
-
-	return nil, nil
 }
 
 func (repository *pgPostRepository) CreatePost(ctx context.Context, post *entity.Post) (*entity.Post, error) {

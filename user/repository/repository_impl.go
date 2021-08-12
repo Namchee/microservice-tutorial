@@ -8,9 +8,9 @@ import (
 )
 
 const (
-	getAllQuery  = "SELECT * FROM user"
-	getByIdQuery = "SELECT * FROM user WHERE user.id = $1"
-	createQuery  = "INSERT INTO user (username, name, bio) VALUES ($1, $2, $3) RETURNING id"
+	getAllQuery  = "SELECT * FROM \"user\";"
+	getByIdQuery = "SELECT * FROM \"user\" WHERE \"user\".id = $1;"
+	createQuery  = "INSERT INTO \"user\" (username, name, bio) VALUES ($1, $2, $3) RETURNING id;"
 )
 
 type pgUserRepository struct {
@@ -37,34 +37,53 @@ func (repo *pgUserRepository) GetUsers(ctx context.Context, _ *entity.Pagination
 
 	var users []*entity.User
 	for rows.Next() {
-		var user *entity.User
+		var id int
+		var username string
+		var name string
+		var bio string
 
-		if err = rows.Scan(&user.Id, &user.Username, &user.Name, &user.Bio); err != nil {
+		err = rows.Scan(&id, &username, &name, &bio)
+
+		if err != nil {
 			return nil, err
 		}
 
-		users = append(users, user)
+		users = append(users, &entity.User{
+			Id:       id,
+			Username: username,
+			Name:     name,
+			Bio:      bio,
+		})
 	}
 
 	return users, nil
 }
 
-func (repo *pgUserRepository) GetUserById(ctx context.Context, id int) (*entity.User, error) {
+func (repo *pgUserRepository) GetUserById(ctx context.Context, queryId int) (*entity.User, error) {
 	row := repo.db.QueryRowContext(
 		ctx,
 		getByIdQuery,
-		id,
+		queryId,
 	)
 
-	var user *entity.User
+	var id int
+	var username string
+	var name string
+	var bio string
 
-	if row != nil {
-		row.Scan(&user.Id, &user.Username, &user.Name, &user.Bio)
-
-		return user, nil
+	switch err := row.Scan(&id, &username, &name, &bio); err {
+	case sql.ErrNoRows:
+		return nil, nil
+	case nil:
+		return &entity.User{
+			Id:       id,
+			Username: username,
+			Name:     name,
+			Bio:      bio,
+		}, nil
+	default:
+		panic(err)
 	}
-
-	return nil, nil
 }
 
 func (repo *pgUserRepository) CreateUser(ctx context.Context, user *entity.User) (*entity.User, error) {

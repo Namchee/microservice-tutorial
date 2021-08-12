@@ -2,7 +2,6 @@ package endpoints
 
 import (
 	"context"
-	"reflect"
 
 	"github.com/Namchee/microservice-tutorial/user/entity"
 	"github.com/Namchee/microservice-tutorial/user/service"
@@ -39,10 +38,7 @@ func makeGetUsersEndpoint(svc service.UserService) endpoint.Endpoint {
 
 func makeGetUserByIdEndpoint(svc service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		reflection := reflect.ValueOf(request).Elem()
-		id := reflection.FieldByName("id").Interface().(int)
-
-		result, err := svc.GetUserById(ctx, id)
+		result, err := svc.GetUserById(ctx, int(request.(int32)))
 
 		if err != nil {
 			return nil, err

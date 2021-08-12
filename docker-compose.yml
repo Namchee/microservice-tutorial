@@ -18,9 +18,9 @@ services:
     environment:
       - DB_USER=namchee
       - DB_PASSWORD=postgres
-      - DB_HOST=user
+      - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_NAME=user
+      - DB_NAME=namchee
     depends_on:
       - postgres
   post:
@@ -30,9 +30,9 @@ services:
     environment:
       - DB_USER=namchee
       - DB_PASSWORD=postgres
-      - DB_HOST=post
+      - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_NAME=post
+      - DB_NAME=namchee
     depends_on:
       - postgres
 

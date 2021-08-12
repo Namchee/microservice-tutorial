@@ -22,9 +22,9 @@ func NewUserService(logger log.Logger, repository repository.UserRepository) *us
 }
 
 func (svc *userService) GetUsers(ctx context.Context, req *entity.Pagination) ([]*entity.User, error) {
-	level.Info(svc.logger).Log("UserService: executing GetUsers query")
+	level.Info(svc.logger).Log("msg", "UserService: executing GetUsers query")
 	users, err := svc.repository.GetUsers(ctx, req)
-	level.Info(svc.logger).Log("UserService: executed GetUsers query")
+	level.Info(svc.logger).Log("msg", "UserService: executed GetUsers query")
 
 	if err != nil {
 		return nil, err
@@ -34,9 +34,9 @@ func (svc *userService) GetUsers(ctx context.Context, req *entity.Pagination) ([
 }
 
 func (svc *userService) GetUserById(ctx context.Context, id int) (*entity.User, error) {
-	level.Info(svc.logger).Log("UserService: executing getUserById query")
+	level.Info(svc.logger).Log("msg", "UserService: executing getUserById query")
 	user, err := svc.repository.GetUserById(ctx, id)
-	level.Info(svc.logger).Log("UserService: executed getUserById query")
+	level.Info(svc.logger).Log("msg", "UserService: executed getUserById query")
 
 	if err != nil {
 		return nil, err
@@ -46,9 +46,9 @@ func (svc *userService) GetUserById(ctx context.Context, id int) (*entity.User, 
 }
 
 func (svc *userService) CreateUser(ctx context.Context, user *entity.User) (*entity.User, error) {
-	level.Info(svc.logger).Log("UserService: executing CreateUser query")
+	level.Info(svc.logger).Log("msg", "UserService: executing CreateUser query")
 	user, err := svc.repository.CreateUser(ctx, user)
-	level.Info(svc.logger).Log("UserService: executed CreateUser query")
+	level.Info(svc.logger).Log("msg", "UserService: executed CreateUser query")
 
 	if err != nil {
 		return nil, err

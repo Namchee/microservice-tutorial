@@ -11,8 +11,8 @@ import (
 func MakeGetUsersLoggingMiddleware(logger log.Logger) endpoint.Middleware {
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (interface{}, error) {
-			level.Info(logger).Log("GetUsers: calling endpoint")
-			defer level.Info(logger).Log("GetUsers: called endpoint")
+			level.Info(logger).Log("msg", "GetUsers: calling endpoint")
+			defer level.Info(logger).Log("msg", "GetUsers: called endpoint")
 			return next(ctx, request)
 		}
 	}
@@ -21,8 +21,8 @@ func MakeGetUsersLoggingMiddleware(logger log.Logger) endpoint.Middleware {
 func MakeGetUserByIdLoggingMiddleware(logger log.Logger) endpoint.Middleware {
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (interface{}, error) {
-			level.Info(logger).Log("GetUserById: calling endpoint")
-			defer level.Info(logger).Log("GetUserById: called endpoint")
+			level.Info(logger).Log("msg", "GetUserById: calling endpoint")
+			defer level.Info(logger).Log("msg", "GetUserById: called endpoint")
 			return next(ctx, request)
 		}
 	}
@@ -31,8 +31,8 @@ func MakeGetUserByIdLoggingMiddleware(logger log.Logger) endpoint.Middleware {
 func MakeCreateUserLoggingMiddleware(logger log.Logger) endpoint.Middleware {
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (interface{}, error) {
-			level.Info(logger).Log("CreateUser: calling endpoint")
-			defer level.Info(logger).Log("CreateUser: called endpoint")
+			level.Info(logger).Log("msg", "CreateUser: calling endpoint")
+			defer level.Info(logger).Log("msg", "CreateUser: called endpoint")
 			return next(ctx, request)
 		}
 	}

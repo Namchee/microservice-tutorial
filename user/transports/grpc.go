@@ -48,7 +48,12 @@ func (s *gRPCServer) GetUserById(ctx context.Context, req *pb.GetUserByIdRequest
 	if err != nil {
 		return nil, err
 	}
-	return resp.(*pb.User), nil
+
+	if resp != nil {
+		return resp.(*pb.User), nil
+	}
+
+	return nil, nil
 }
 
 func (s *gRPCServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
@@ -62,9 +67,20 @@ func (s *gRPCServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) 
 func decodeGetUsersRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(*pb.GetUsersRequest)
 
+	limit := 0
+	offset := 0
+
+	if req.Limit != nil {
+		limit = int(*req.Limit)
+	}
+
+	if req.Offset != nil {
+		offset = int(*req.Offset)
+	}
+
 	return &entity.Pagination{
-		Limit:  int(*req.Limit),
-		Offset: int(*req.Offset),
+		Limit:  limit,
+		Offset: offset,
 	}, nil
 }
 
@@ -84,7 +100,9 @@ func encodeGetUsersResponse(_ context.Context, response interface{}) (interface{
 		users = append(users, pbUser)
 	}
 
-	return users, nil
+	return &pb.GetUsersResponse{
+		Users: users,
+	}, nil
 }
 
 func decodeGetUserByIdRequest(_ context.Context, request interface{}) (interface{}, error) {
@@ -94,6 +112,10 @@ func decodeGetUserByIdRequest(_ context.Context, request interface{}) (interface
 
 func encodeGetUserByIdResponse(_ context.Context, response interface{}) (interface{}, error) {
 	res := response.(*entity.User)
+
+	if res == nil {
+		return nil, nil
+	}
 
 	return &pb.User{
 		Id:       int32(res.Id),
