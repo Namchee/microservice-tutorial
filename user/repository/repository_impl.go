@@ -9,7 +9,7 @@ import (
 
 const (
 	getAllQuery  = "SELECT * FROM \"user\";"
-	getByIdQuery = "SELECT * FROM \"user\" WHERE \"user\".id = $1;"
+	getByIdQuery = "SELECT * FROM \"user\" WHERE id = $1;"
 	createQuery  = "INSERT INTO \"user\" (username, name, bio) VALUES ($1, $2, $3) RETURNING id;"
 )
 

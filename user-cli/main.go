@@ -20,18 +20,33 @@ func main() {
 
 	client := pb.NewUserServiceClient(conn)
 
-	var req *pb.GetUserByIdRequest = &pb.GetUserByIdRequest{
-		Id: 1,
+	var req *pb.CreateUserRequest = &pb.CreateUserRequest{
+		Username: "namchee",
+		Name:     "Budi",
+		Bio:      "Hello World",
 	}
 
-	user, err := client.GetUserById(context.Background(), req)
+	var id int
+	inserted, err := client.CreateUser(context.Background(), req)
 
 	if err != nil {
 		log.Fatalln(err.Error())
 		log.Fatalln("failed to call user service")
 	}
 
-	if user == nil {
-		fmt.Println("Yay!!")
+	if inserted != nil {
+		id = int(inserted.Id)
 	}
+
+	var res *pb.GetUserByIdRequest = &pb.GetUserByIdRequest{
+		Id: int32(id),
+	}
+
+	user, err := client.GetUserById(context.Background(), res)
+
+	if err != nil || user.Data == nil {
+		panic("user should exist")
+	}
+
+	fmt.Println(user.Data.Username)
 }

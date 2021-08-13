@@ -6,7 +6,7 @@ package protobuf;
 service UserService {
     rpc CreateUser(CreateUserRequest) returns (User) {};
     rpc GetUsers(GetUsersRequest) returns (GetUsersResponse) {};
-    rpc GetUserById(GetUserByIdRequest) returns (User) {};
+    rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse) {};
 }
 
 message User {
@@ -28,9 +28,13 @@ message GetUsersRequest {
 }
 
 message GetUsersResponse {
-    repeated User users = 1;
+    repeated User data = 1;
 }
 
 message GetUserByIdRequest {
     int32 id = 1;
+}
+
+message GetUserByIdResponse {
+    optional User data = 1;
 }

@@ -43,17 +43,13 @@ func (s *gRPCServer) GetUsers(ctx context.Context, req *pb.GetUsersRequest) (*pb
 	return resp.(*pb.GetUsersResponse), nil
 }
 
-func (s *gRPCServer) GetUserById(ctx context.Context, req *pb.GetUserByIdRequest) (*pb.User, error) {
+func (s *gRPCServer) GetUserById(ctx context.Context, req *pb.GetUserByIdRequest) (*pb.GetUserByIdResponse, error) {
 	_, resp, err := s.getUserById.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
-	if resp != nil {
-		return resp.(*pb.User), nil
-	}
-
-	return nil, nil
+	return resp.(*pb.GetUserByIdResponse), nil
 }
 
 func (s *gRPCServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
@@ -101,7 +97,7 @@ func encodeGetUsersResponse(_ context.Context, response interface{}) (interface{
 	}
 
 	return &pb.GetUsersResponse{
-		Users: users,
+		Data: users,
 	}, nil
 }
 
@@ -112,16 +108,19 @@ func decodeGetUserByIdRequest(_ context.Context, request interface{}) (interface
 
 func encodeGetUserByIdResponse(_ context.Context, response interface{}) (interface{}, error) {
 	res := response.(*entity.User)
+	var data *pb.User
 
-	if res == nil {
-		return nil, nil
+	if res != nil {
+		data = &pb.User{
+			Id:       int32(res.Id),
+			Username: res.Username,
+			Name:     res.Name,
+			Bio:      res.Bio,
+		}
 	}
 
-	return &pb.User{
-		Id:       int32(res.Id),
-		Username: res.Username,
-		Name:     res.Name,
-		Bio:      res.Bio,
+	return &pb.GetUserByIdResponse{
+		Data: data,
 	}, nil
 }
 
