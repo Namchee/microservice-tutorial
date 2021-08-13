@@ -6,7 +6,7 @@ package protobuf;
 service PostService {
     rpc CreatePost(CreatePostRequest) returns (Post) {};
     rpc GetPosts(GetPostsRequest) returns (GetPostsResponse) {};
-    rpc GetPostById(GetPostByIdRequest) returns (Post) {};
+    rpc GetPostById(GetPostByIdRequest) returns (GetPostByIdResponse) {};
 }
 
 message Post {
@@ -21,14 +21,18 @@ message CreatePostRequest {
 }
 
 message GetPostsRequest {
-    int32 offset = 1;
-    int32 limit = 2;
+    optional int32 offset = 1;
+    optional int32 limit = 2;
 }
 
 message GetPostsResponse {
-    repeated Post posts = 1;
+    repeated Post data = 1;
 }
 
 message GetPostByIdRequest {
     int32 id = 1;
+}
+
+message GetPostByIdResponse {
+    optional Post data = 1;
 }

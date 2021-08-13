@@ -4,9 +4,3 @@ CREATE TABLE IF NOT EXISTS "user" (
     "name" VARCHAR(128) NOT NULL,
     bio VARCHAR(256) NOT NUll
 );
-
-CREATE TABLE IF NOT EXISTS post (
-    id SERIAL PRIMARY KEY,
-    "text" VARCHAR(1024) NOT NULL,
-    "user" INTEGER NOT NULL
-);

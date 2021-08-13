@@ -2,11 +2,11 @@ package endpoints
 
 import (
 	"context"
-	"reflect"
 
 	"github.com/Namchee/microservice-tutorial/post/entity"
 	"github.com/Namchee/microservice-tutorial/post/service"
 	"github.com/go-kit/kit/endpoint"
+	"github.com/go-kit/kit/log"
 )
 
 type PostEndpoints struct {
@@ -15,11 +15,11 @@ type PostEndpoints struct {
 	CreatePost  endpoint.Endpoint
 }
 
-func NewPostEndpoint(svc service.PostService) *PostEndpoints {
+func NewPostEndpoint(logger log.Logger, svc service.PostService) *PostEndpoints {
 	return &PostEndpoints{
-		GetPosts:    makeGetPostsEndpoint(svc),
-		GetPostById: makeGetPostByIdEndpoint(svc),
-		CreatePost:  makeCreatePostEndpoint(svc),
+		GetPosts:    MakeGetPostsLoggingMiddleware(logger)(makeGetPostsEndpoint(svc)),
+		GetPostById: MakeGetPostByIdLoggingMiddleware(logger)(makeGetPostByIdEndpoint(svc)),
+		CreatePost:  MakeCreatePostLoggingMiddleware(logger)(makeCreatePostEndpoint(svc)),
 	}
 }
 
@@ -38,8 +38,7 @@ func makeGetPostsEndpoint(svc service.PostService) endpoint.Endpoint {
 
 func makeGetPostByIdEndpoint(svc service.PostService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		reflection := reflect.ValueOf(request).Elem()
-		id := reflection.FieldByName("id").Interface().(int)
+		id := int(request.(int32))
 
 		result, err := svc.GetPostById(ctx, id)
 

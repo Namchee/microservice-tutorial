@@ -13,4 +13,5 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-db-data/
+db-data-user/
+db-data-post/

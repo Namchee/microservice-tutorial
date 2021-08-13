@@ -43,12 +43,12 @@ func (s *gRPCServer) GetPosts(ctx context.Context, req *pb.GetPostsRequest) (*pb
 	return resp.(*pb.GetPostsResponse), nil
 }
 
-func (s *gRPCServer) GetPostById(ctx context.Context, req *pb.GetPostByIdRequest) (*pb.Post, error) {
+func (s *gRPCServer) GetPostById(ctx context.Context, req *pb.GetPostByIdRequest) (*pb.GetPostByIdResponse, error) {
 	_, resp, err := s.getPostById.ServeGRPC(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return resp.(*pb.Post), nil
+	return resp.(*pb.GetPostByIdResponse), nil
 }
 
 func (s *gRPCServer) CreatePost(ctx context.Context, req *pb.CreatePostRequest) (*pb.Post, error) {
@@ -62,9 +62,20 @@ func (s *gRPCServer) CreatePost(ctx context.Context, req *pb.CreatePostRequest) 
 func decodeGetPostsRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(*pb.GetPostsRequest)
 
+	var limit int = 1
+	var offset int = 0
+
+	if req.Limit != nil {
+		limit = int(*req.Limit)
+	}
+
+	if req.Offset != nil {
+		offset = int(*req.Offset)
+	}
+
 	return &entity.Pagination{
-		Limit:  int(req.Limit),
-		Offset: int(req.Offset),
+		Limit:  limit,
+		Offset: offset,
 	}, nil
 }
 
@@ -83,7 +94,9 @@ func encodeGetUsersResponse(_ context.Context, response interface{}) (interface{
 		posts = append(posts, pbPost)
 	}
 
-	return posts, nil
+	return &pb.GetPostsResponse{
+		Data: posts,
+	}, nil
 }
 
 func decodeGetPostByIdRequest(_ context.Context, request interface{}) (interface{}, error) {
@@ -94,11 +107,19 @@ func decodeGetPostByIdRequest(_ context.Context, request interface{}) (interface
 func encodeGetPostByIdResponse(_ context.Context, response interface{}) (interface{}, error) {
 	res := response.(*entity.Post)
 
-	return &pb.Post{
-		Id:   int32(res.Id),
-		Text: res.Text,
-		User: int32(res.Id),
-	}, nil
+	var resp *pb.GetPostByIdResponse
+
+	if res != nil {
+		resp = &pb.GetPostByIdResponse{
+			Data: &pb.Post{
+				Id:   int32(res.Id),
+				Text: res.Text,
+				User: int32(res.Id),
+			},
+		}
+	}
+
+	return resp, nil
 }
 
 func decodeCreatePostRequest(_ context.Context, request interface{}) (interface{}, error) {

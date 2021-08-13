@@ -1,16 +1,29 @@
 version: "3"
 services: 
-  postgres:
+  postgres-user:
     build: 
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.user
     volumes:
-      - ./db-data:/var/lib/postgresql/data
+      - ./db-data-user:/var/lib/postgresql/data
     ports: 
       - "5432:5432"
     environment: 
       - POSTGRES_USER=namchee
       - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=users
+  postgres-post:
+    build: 
+      context: .
+      dockerfile: Dockerfile.post
+    volumes:
+      - ./db-data-post:/var/lib/postgresql/data
+    ports: 
+      - "5433:5432"
+    environment: 
+      - POSTGRES_USER=namchee
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=post
   user:
     build: ./user
     ports:
@@ -18,11 +31,11 @@ services:
     environment:
       - DB_USER=namchee
       - DB_PASSWORD=postgres
-      - DB_HOST=postgres
+      - DB_HOST=postgres-user
       - DB_PORT=5432
-      - DB_NAME=namchee
+      - DB_NAME=users
     depends_on:
-      - postgres
+      - postgres-user
   post:
     build: ./post
     ports:
@@ -30,12 +43,14 @@ services:
     environment:
       - DB_USER=namchee
       - DB_PASSWORD=postgres
-      - DB_HOST=postgres
+      - DB_HOST=postgres-post
       - DB_PORT=5432
-      - DB_NAME=namchee
+      - DB_NAME=post
     depends_on:
-      - postgres
+      - postgres-post
 
 volumes:
-  db-data:
+  db-data-user:
+    driver: local
+  db-data-post:
     driver: local

@@ -7,6 +7,7 @@ import (
 	"github.com/Namchee/microservice-tutorial/post/entity"
 	"github.com/Namchee/microservice-tutorial/post/repository"
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 )
 
 var (
@@ -20,7 +21,7 @@ type postService struct {
 	logger     log.Logger
 }
 
-func NewPostService(repository repository.PostRepository, logger log.Logger) PostService {
+func NewPostService(logger log.Logger, repository repository.PostRepository) PostService {
 	return &postService{
 		repository: repository,
 		logger:     logger,
@@ -36,7 +37,9 @@ func (svc *postService) GetPosts(ctx context.Context, pagination *entity.Paginat
 		return nil, errOutOfRangeOffset
 	}
 
+	level.Info(svc.logger).Log("msg", "PostService: executing GetPosts query")
 	posts, err := svc.repository.GetPosts(ctx, pagination)
+	level.Info(svc.logger).Log("msg", "PostService: executed GetPosts query")
 
 	if err != nil {
 		return nil, err
@@ -50,7 +53,9 @@ func (svc *postService) GetPostById(ctx context.Context, id int) (*entity.Post, 
 		return nil, errOutOfRangeId
 	}
 
+	level.Info(svc.logger).Log("msg", "PostService: executing GetPostById query")
 	post, err := svc.repository.GetPostById(ctx, id)
+	level.Info(svc.logger).Log("msg", "PostService: executed GetPostById query")
 
 	if err != nil {
 		return nil, err
@@ -60,7 +65,9 @@ func (svc *postService) GetPostById(ctx context.Context, id int) (*entity.Post, 
 }
 
 func (svc *postService) CreatePost(ctx context.Context, data *entity.Post) (*entity.Post, error) {
+	level.Info(svc.logger).Log("msg", "PostService: executing CreatePost query")
 	post, err := svc.repository.CreatePost(ctx, data)
+	level.Info(svc.logger).Log("msg", "PostService: executed CreatePost query")
 
 	if err != nil {
 		return nil, err

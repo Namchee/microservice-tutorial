@@ -9,8 +9,8 @@ import (
 
 const (
 	getAllQuery  = "SELECT * FROM post;"
-	getByIdQuery = "SELECT * FROM post WHERE post.id = $1;"
-	createQuery  = "INSERT INTO post (text, user) VALUES ($1, $2) RETURNING id;"
+	getByIdQuery = "SELECT * FROM post WHERE id = $1;"
+	createQuery  = "INSERT INTO post (text, \"user\") VALUES ($1, $2) RETURNING id;"
 )
 
 type pgPostRepository struct {
