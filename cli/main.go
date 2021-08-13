@@ -5,47 +5,46 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Namchee/microservice-tutorial/post/pb"
+	pbp "github.com/Namchee/microservice-tutorial/post/pb"
+	pbu "github.com/Namchee/microservice-tutorial/user/pb"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	conn, err := grpc.Dial(":50052", grpc.WithInsecure())
+	userConn, userErr := grpc.Dial(":50051", grpc.WithInsecure())
+	postConn, postErr := grpc.Dial(":50052", grpc.WithInsecure())
+
+	if userErr != nil {
+		log.Fatalln("failed to connect to user gRPC server")
+	}
+
+	if postErr != nil {
+		log.Fatalln("failed to connect to post gRPC server")
+	}
+
+	defer userConn.Close()
+	defer postConn.Close()
+
+	userClient := pbu.NewUserServiceClient(userConn)
+	postClient := pbp.NewPostServiceClient(postConn)
+
+	users, err := userClient.GetUsers(context.Background(), &pbu.GetUsersRequest{})
 
 	if err != nil {
-		log.Fatalln("failed to connect to gRPC server")
+		log.Fatalln("failed to call user service")
 	}
 
-	defer conn.Close()
-
-	client := pb.NewPostServiceClient(conn)
-
-	var req *pb.CreatePostRequest = &pb.CreatePostRequest{
+	var req *pbp.CreatePostRequest = &pbp.CreatePostRequest{
 		Text: "Hello World",
-		User: 1000,
+		User: users.Data[len(users.Data)-1].Id,
 	}
 
-	var id int
-	inserted, err := client.CreatePost(context.Background(), req)
+	inserted, err := postClient.CreatePost(context.Background(), req)
 
 	if err != nil {
 		log.Fatalln(err.Error())
 		log.Fatalln("failed to call post service")
 	}
 
-	if inserted != nil {
-		id = int(inserted.Id)
-	}
-
-	var res *pb.GetPostByIdRequest = &pb.GetPostByIdRequest{
-		Id: int32(id),
-	}
-
-	post, err := client.GetPostById(context.Background(), res)
-
-	if err != nil || post.Data == nil {
-		panic("post should exist")
-	}
-
-	fmt.Println(post.Data.Text)
+	fmt.Println(inserted.Id)
 }

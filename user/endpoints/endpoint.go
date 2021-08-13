@@ -17,9 +17,9 @@ type UserEndpoints struct {
 
 func NewUserEndpoint(logger log.Logger, svc service.UserService) *UserEndpoints {
 	return &UserEndpoints{
-		GetUsers:    MakeGetUsersLoggingMiddleware(logger)(makeGetUsersEndpoint(svc)),
-		GetUserById: MakeGetUserByIdLoggingMiddleware(logger)(makeGetUserByIdEndpoint(svc)),
-		CreateUser:  MakeCreateUserLoggingMiddleware(logger)(makeCreateUserEndpoint(svc)),
+		GetUsers:    makeGetUsersEndpoint(svc),
+		GetUserById: makeGetUserByIdEndpoint(svc),
+		CreateUser:  makeCreateUserEndpoint(svc),
 	}
 }
 

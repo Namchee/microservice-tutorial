@@ -36,7 +36,8 @@ func main() {
 	}
 
 	repository := repository.NewPgUserRepository(db)
-	userService := service.NewUserService(logger, repository)
+	userService := service.NewUserService(repository)
+	userService = service.NewLoggingMiddleware(logger)(userService)
 	userEndpoint := endpoints.NewUserEndpoint(logger, userService)
 	grpcServer := transports.NewGRPCServer(userEndpoint)
 
