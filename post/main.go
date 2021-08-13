@@ -13,6 +13,7 @@ import (
 	"github.com/Namchee/microservice-tutorial/post/repository"
 	"github.com/Namchee/microservice-tutorial/post/service"
 	"github.com/Namchee/microservice-tutorial/post/transports"
+	upb "github.com/Namchee/microservice-tutorial/user/pb"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"google.golang.org/grpc"
@@ -35,9 +36,18 @@ func main() {
 		os.Exit(1)
 	}
 
+	userConn, err := grpc.Dial("user:50051", grpc.WithInsecure())
+
+	if err != nil {
+		level.Error(logger).Log("err", "failed to connect to user service")
+	}
+	userClient := upb.NewUserServiceClient(userConn)
+
 	repository := repository.NewPgPostRepository(db)
-	postService := service.NewPostService(logger, repository)
-	postEndpoints := endpoints.NewPostEndpoint(logger, postService)
+	postService := service.NewPostService(repository)
+	postService = service.NewPostServiceProxy(userClient)(postService)
+	postService = service.NewPostLoggingMiddleware(logger)(postService)
+	postEndpoints := endpoints.NewPostEndpoint(postService)
 	grpcServer := transports.NewGRPCServer(postEndpoints)
 
 	errs := make(chan error)

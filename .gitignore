@@ -15,3 +15,5 @@
 # vendor/
 db-data-user/
 db-data-post/
+
+**/vendor

@@ -22,7 +22,7 @@ func main() {
 
 	var req *pb.CreatePostRequest = &pb.CreatePostRequest{
 		Text: "Hello World",
-		User: 1,
+		User: 1000,
 	}
 
 	var id int

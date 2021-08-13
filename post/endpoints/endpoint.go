@@ -6,7 +6,6 @@ import (
 	"github.com/Namchee/microservice-tutorial/post/entity"
 	"github.com/Namchee/microservice-tutorial/post/service"
 	"github.com/go-kit/kit/endpoint"
-	"github.com/go-kit/kit/log"
 )
 
 type PostEndpoints struct {
@@ -15,11 +14,11 @@ type PostEndpoints struct {
 	CreatePost  endpoint.Endpoint
 }
 
-func NewPostEndpoint(logger log.Logger, svc service.PostService) *PostEndpoints {
+func NewPostEndpoint(svc service.PostService) *PostEndpoints {
 	return &PostEndpoints{
-		GetPosts:    MakeGetPostsLoggingMiddleware(logger)(makeGetPostsEndpoint(svc)),
-		GetPostById: MakeGetPostByIdLoggingMiddleware(logger)(makeGetPostByIdEndpoint(svc)),
-		CreatePost:  MakeCreatePostLoggingMiddleware(logger)(makeCreatePostEndpoint(svc)),
+		GetPosts:    makeGetPostsEndpoint(svc),
+		GetPostById: makeGetPostByIdEndpoint(svc),
+		CreatePost:  makeCreatePostEndpoint(svc),
 	}
 }
 
