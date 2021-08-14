@@ -1,14 +1,18 @@
 package main
 
 import (
+	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"net"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 
 	"github.com/Namchee/microservice-tutorial/post/endpoints"
+	"github.com/Namchee/microservice-tutorial/post/entity"
 	"github.com/Namchee/microservice-tutorial/post/pb"
 	"github.com/Namchee/microservice-tutorial/post/repository"
 	"github.com/Namchee/microservice-tutorial/post/service"
@@ -44,15 +48,22 @@ func main() {
 
 	grpcStr := fmt.Sprintf("%s:%s", os.Getenv("USER_HOST"), os.Getenv("USER_PORT"))
 
-	userConn, err := grpc.Dial("user:50051", grpc.WithInsecure())
+	userConn, err := grpc.Dial(grpcStr, grpc.WithInsecure())
 
 	if err != nil {
 		level.Error(logger).Log("err", "failed to connect to user service")
+		os.Exit(1)
 	}
 	userClient := upb.NewUserServiceClient(userConn)
 
-	consumer, err := nsq.NewConsumer(messageTopic, messageChannel, &nsq.Config{})
-	consumer.ConnectToNSQD("")
+	lookupAddres := fmt.Sprintf("%s:%s", os.Getenv("LOOKUP_HOST"), os.Getenv("LOOKUP_PORT"))
+	consumer, _ := nsq.NewConsumer(messageTopic, messageChannel, &nsq.Config{})
+	err = consumer.ConnectToNSQD(lookupAddres)
+
+	if err != nil {
+		level.Error(logger).Log("err", "failed to connect to message queue")
+		os.Exit(1)
+	}
 
 	repository := repository.NewPgPostRepository(db)
 	postService := service.NewPostService(repository)
@@ -60,6 +71,26 @@ func main() {
 	postService = service.NewPostLoggingMiddleware(logger)(postService)
 	postEndpoints := endpoints.NewPostEndpoint(postService)
 	grpcServer := transports.NewGRPCServer(postEndpoints)
+
+	consumer.AddHandler(nsq.HandlerFunc(func(message *nsq.Message) error {
+		var msg *entity.Message
+
+		err := json.Unmarshal(message.Body, &msg)
+
+		if err != nil {
+			return err
+		}
+
+		user, err := strconv.ParseInt(msg.Content, 10, 32)
+
+		_, err = postEndpoints.DeletePostByUser(context.Background(), user)
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}))
 
 	errs := make(chan error)
 	c := make(chan os.Signal)
