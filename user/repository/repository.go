@@ -10,4 +10,5 @@ type UserRepository interface {
 	GetUsers(context.Context, *entity.Pagination) ([]*entity.User, error)
 	GetUserById(context.Context, int) (*entity.User, error)
 	CreateUser(context.Context, *entity.User) (*entity.User, error)
+	DeleteUser(context.Context, int) (*entity.User, error)
 }

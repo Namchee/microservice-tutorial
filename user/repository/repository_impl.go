@@ -10,7 +10,8 @@ import (
 const (
 	getAllQuery  = "SELECT * FROM \"user\";"
 	getByIdQuery = "SELECT * FROM \"user\" WHERE id = $1;"
-	createQuery  = "INSERT INTO \"user\" (username, name, bio) VALUES ($1, $2, $3) RETURNING id;"
+	createQuery  = "INSERT INTO \"user\" (username, \"name\", bio) VALUES ($1, $2, $3) RETURNING id;"
+	deleteQuery  = "DELETE FROM \"user\" WHERE id = $1 RETURNING username, \"name\", bio;"
 )
 
 type pgUserRepository struct {
@@ -106,5 +107,28 @@ func (repo *pgUserRepository) CreateUser(ctx context.Context, user *entity.User)
 		Username: user.Username,
 		Name:     user.Name,
 		Bio:      user.Bio,
+	}, nil
+}
+
+func (repo *pgUserRepository) DeleteUser(ctx context.Context, id int) (*entity.User, error) {
+	var username string
+	var name string
+	var bio string
+
+	err := repo.db.QueryRowContext(
+		ctx,
+		deleteQuery,
+		id,
+	).Scan(&username, &name, &bio)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &entity.User{
+		Id:       id,
+		Username: username,
+		Name:     name,
+		Bio:      bio,
 	}, nil
 }

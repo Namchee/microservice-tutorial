@@ -10,4 +10,6 @@ type PostService interface {
 	GetPosts(context.Context, *entity.Pagination) ([]*entity.Post, error)
 	GetPostById(context.Context, int) (*entity.Post, error)
 	CreatePost(context.Context, *entity.Post) (*entity.Post, error)
+	DeletePost(context.Context, int) (*entity.Post, error)
+	DeletePostByUser(context.Context, int) ([]*entity.Post, error)
 }

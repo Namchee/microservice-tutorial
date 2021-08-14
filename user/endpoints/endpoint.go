@@ -2,6 +2,8 @@ package endpoints
 
 import (
 	"context"
+	"strconv"
+	"time"
 
 	"github.com/Namchee/microservice-tutorial/user/entity"
 	"github.com/Namchee/microservice-tutorial/user/service"
@@ -13,13 +15,15 @@ type UserEndpoints struct {
 	GetUsers    endpoint.Endpoint
 	GetUserById endpoint.Endpoint
 	CreateUser  endpoint.Endpoint
+	DeleteUser  endpoint.Endpoint
 }
 
-func NewUserEndpoint(logger log.Logger, svc service.UserService) *UserEndpoints {
+func NewUserEndpoint(logger log.Logger, svc service.UserService, mq service.PublisherService) *UserEndpoints {
 	return &UserEndpoints{
 		GetUsers:    makeGetUsersEndpoint(svc),
 		GetUserById: makeGetUserByIdEndpoint(svc),
 		CreateUser:  makeCreateUserEndpoint(svc),
+		DeleteUser:  makeDeleteUserEndpoint(svc, mq),
 	}
 }
 
@@ -52,6 +56,30 @@ func makeCreateUserEndpoint(svc service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(*entity.User)
 		result, err := svc.CreateUser(ctx, req)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return result, nil
+	}
+}
+
+func makeDeleteUserEndpoint(svc service.UserService, mq service.PublisherService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		result, err := svc.DeleteUser(ctx, int(request.(int32)))
+
+		if err != nil {
+			return nil, err
+		}
+
+		msg := &entity.Message{
+			Name:      "delete",
+			Content:   strconv.Itoa(result.Id),
+			Timestamp: time.UTC.String(),
+		}
+
+		err = mq.Publish(ctx, msg)
 
 		if err != nil {
 			return nil, err

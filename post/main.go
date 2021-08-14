@@ -16,9 +16,15 @@ import (
 	upb "github.com/Namchee/microservice-tutorial/user/pb"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
+	nsq "github.com/nsqio/go-nsq"
 	"google.golang.org/grpc"
 
 	_ "github.com/lib/pq"
+)
+
+const (
+	messageTopic   = "post"
+	messageChannel = "chan"
 )
 
 func main() {
@@ -36,12 +42,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	grpcStr := fmt.Sprintf("%s:%s", os.Getenv("USER_HOST"), os.Getenv("USER_PORT"))
+
 	userConn, err := grpc.Dial("user:50051", grpc.WithInsecure())
 
 	if err != nil {
 		level.Error(logger).Log("err", "failed to connect to user service")
 	}
 	userClient := upb.NewUserServiceClient(userConn)
+
+	consumer, err := nsq.NewConsumer(messageTopic, messageChannel, &nsq.Config{})
+	consumer.ConnectToNSQD("")
 
 	repository := repository.NewPgPostRepository(db)
 	postService := service.NewPostService(repository)

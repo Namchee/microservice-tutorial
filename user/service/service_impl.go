@@ -46,3 +46,13 @@ func (svc *userService) CreateUser(ctx context.Context, user *entity.User) (*ent
 
 	return user, err
 }
+
+func (svc *userService) DeleteUser(ctx context.Context, id int) (*entity.User, error) {
+	user, err := svc.repository.DeleteUser(ctx, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}

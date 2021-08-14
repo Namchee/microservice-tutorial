@@ -13,6 +13,7 @@ type gRPCServer struct {
 	getUsers    gt.Handler
 	getUserById gt.Handler
 	createUser  gt.Handler
+	deleteUser  gt.Handler
 }
 
 func NewGRPCServer(endpoints *endpoints.UserEndpoints) pb.UserServiceServer {
@@ -31,6 +32,11 @@ func NewGRPCServer(endpoints *endpoints.UserEndpoints) pb.UserServiceServer {
 			endpoints.CreateUser,
 			decodeCreateUserRequest,
 			encodeCreateUserResponse,
+		),
+		deleteUser: gt.NewServer(
+			endpoints.DeleteUser,
+			decodeDeleteUserRequest,
+			encodeDeleteUserResponse,
 		),
 	}
 }
@@ -58,6 +64,14 @@ func (s *gRPCServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) 
 		return nil, err
 	}
 	return resp.(*pb.User), nil
+}
+
+func (s *gRPCServer) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*pb.DeleteUserResponse, error) {
+	_, resp, err := s.deleteUser.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*pb.DeleteUserResponse), nil
 }
 
 func decodeGetUsersRequest(_ context.Context, request interface{}) (interface{}, error) {
@@ -142,5 +156,28 @@ func encodeCreateUserResponse(_ context.Context, response interface{}) (interfac
 		Username: res.Username,
 		Name:     res.Name,
 		Bio:      res.Bio,
+	}, nil
+}
+
+func decodeDeleteUserRequest(_ context.Context, request interface{}) (interface{}, error) {
+	req := request.(*pb.DeleteUserRequest)
+	return req.Id, nil
+}
+
+func encodeDeleteUserResponse(_ context.Context, response interface{}) (interface{}, error) {
+	res := response.(*entity.User)
+	var user *pb.User
+
+	if res != nil {
+		user = &pb.User{
+			Id:       int32(res.Id),
+			Username: res.Username,
+			Name:     res.Name,
+			Bio:      res.Bio,
+		}
+	}
+
+	return &pb.DeleteUserResponse{
+		User: user,
 	}, nil
 }

@@ -65,3 +65,23 @@ func (svc *postService) CreatePost(ctx context.Context, data *entity.Post) (*ent
 
 	return post, nil
 }
+
+func (svc *postService) DeletePost(ctx context.Context, postId int) (*entity.Post, error) {
+	post, err := svc.repository.DeletePost(ctx, postId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return post, nil
+}
+
+func (svc *postService) DeletePostByUser(ctx context.Context, userId int) ([]*entity.Post, error) {
+	posts, err := svc.repository.DeletePostByUser(ctx, userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return posts, nil
+}

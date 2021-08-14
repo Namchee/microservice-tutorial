@@ -15,6 +15,7 @@ import (
 	"github.com/Namchee/microservice-tutorial/user/transports"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
+	"github.com/nsqio/go-nsq"
 	"google.golang.org/grpc"
 
 	_ "github.com/lib/pq"
@@ -31,14 +32,22 @@ func main() {
 	db, err := sql.Open("postgres", connStr)
 
 	if err != nil {
-		level.Error(logger).Log("failed to connect to database")
+		level.Error(logger).Log("err", "failed to connect to database")
+		os.Exit(1)
+	}
+
+	producer, err := nsq.NewProducer(fmt.Sprintf("%s:%s", os.Getenv("NSQ_HOST"), os.Getenv("NSQ_PORT")), nsq.NewConfig())
+
+	if err != nil {
+		level.Error(logger).Log("err", "failed to connect to message queue")
 		os.Exit(1)
 	}
 
 	repository := repository.NewPgUserRepository(db)
 	userService := service.NewUserService(repository)
 	userService = service.NewLoggingMiddleware(logger)(userService)
-	userEndpoint := endpoints.NewUserEndpoint(logger, userService)
+	publisher := service.NewNSQPublisher(producer)
+	userEndpoint := endpoints.NewUserEndpoint(logger, userService, publisher)
 	grpcServer := transports.NewGRPCServer(userEndpoint)
 
 	errs := make(chan error)

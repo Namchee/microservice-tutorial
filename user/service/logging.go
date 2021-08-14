@@ -35,7 +35,7 @@ func (mw *loggingMiddleware) GetUsers(ctx context.Context, pagination *entity.Pa
 func (mw *loggingMiddleware) GetUserById(ctx context.Context, id int) (*entity.User, error) {
 	defer func(begin time.Time) {
 		level.Info(mw.logger).Log(
-			"method", "GetUsers",
+			"method", "GetUserById",
 			"time", time.Since(begin),
 		)
 	}(time.Now())
@@ -45,9 +45,19 @@ func (mw *loggingMiddleware) GetUserById(ctx context.Context, id int) (*entity.U
 func (mw *loggingMiddleware) CreateUser(ctx context.Context, user *entity.User) (*entity.User, error) {
 	defer func(begin time.Time) {
 		level.Info(mw.logger).Log(
-			"method", "GetUsers",
+			"method", "CreateUser",
 			"time", time.Since(begin),
 		)
 	}(time.Now())
 	return mw.next.CreateUser(ctx, user)
+}
+
+func (mw *loggingMiddleware) DeleteUser(ctx context.Context, id int) (*entity.User, error) {
+	defer func(begin time.Time) {
+		level.Info(mw.logger).Log(
+			"method", "DeleteUser",
+			"time", time.Since(begin),
+		)
+	}(time.Now())
+	return mw.next.DeleteUser(ctx, id)
 }

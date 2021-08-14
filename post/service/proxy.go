@@ -50,3 +50,11 @@ func (mw *proxyMiddleware) CreatePost(ctx context.Context, post *entity.Post) (*
 
 	return mw.next.CreatePost(ctx, post)
 }
+
+func (mw *proxyMiddleware) DeletePost(ctx context.Context, postId int) (*entity.Post, error) {
+	return mw.next.DeletePost(ctx, postId)
+}
+
+func (mw *proxyMiddleware) DeletePostByUser(ctx context.Context, userId int) ([]*entity.Post, error) {
+	return mw.next.DeletePostByUser(ctx, userId)
+}

@@ -22,7 +22,7 @@ func NewPostLoggingMiddleware(logger log.Logger) LoggingMiddleware {
 	}
 }
 
-func (mw *loggingMiddleware) GetPosts(ctx context.Context, pagination *entity.Pagination) (posts []*entity.Post, err error) {
+func (mw *loggingMiddleware) GetPosts(ctx context.Context, pagination *entity.Pagination) ([]*entity.Post, error) {
 	defer func(begin time.Time) {
 		level.Info(mw.logger).Log(
 			"method", "GetPosts",
@@ -33,7 +33,7 @@ func (mw *loggingMiddleware) GetPosts(ctx context.Context, pagination *entity.Pa
 	return mw.next.GetPosts(ctx, pagination)
 }
 
-func (mw *loggingMiddleware) GetPostById(ctx context.Context, id int) (post *entity.Post, err error) {
+func (mw *loggingMiddleware) GetPostById(ctx context.Context, id int) (*entity.Post, error) {
 	defer func(begin time.Time) {
 		level.Info(mw.logger).Log(
 			"method", "GetPostById",
@@ -44,7 +44,7 @@ func (mw *loggingMiddleware) GetPostById(ctx context.Context, id int) (post *ent
 	return mw.next.GetPostById(ctx, id)
 }
 
-func (mw *loggingMiddleware) CreatePost(ctx context.Context, post *entity.Post) (entity *entity.Post, err error) {
+func (mw *loggingMiddleware) CreatePost(ctx context.Context, post *entity.Post) (*entity.Post, error) {
 	defer func(begin time.Time) {
 		level.Info(mw.logger).Log(
 			"method", "CreatePost",
@@ -53,4 +53,26 @@ func (mw *loggingMiddleware) CreatePost(ctx context.Context, post *entity.Post) 
 	}(time.Now())
 
 	return mw.next.CreatePost(ctx, post)
+}
+
+func (mw *loggingMiddleware) DeletePost(ctx context.Context, postId int) (*entity.Post, error) {
+	defer func(begin time.Time) {
+		level.Info(mw.logger).Log(
+			"method", "DeletePost",
+			"time", time.Since(begin),
+		)
+	}(time.Now())
+
+	return mw.next.DeletePost(ctx, postId)
+}
+
+func (mw *loggingMiddleware) DeletePostByUser(ctx context.Context, userId int) ([]*entity.Post, error) {
+	defer func(begin time.Time) {
+		level.Info(mw.logger).Log(
+			"method", "DeletePostByUser",
+			"time", time.Since(begin),
+		)
+	}(time.Now())
+
+	return mw.next.DeletePostByUser(ctx, userId)
 }

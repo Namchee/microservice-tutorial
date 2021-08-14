@@ -8,9 +8,11 @@ import (
 )
 
 const (
-	getAllQuery  = "SELECT * FROM post;"
-	getByIdQuery = "SELECT * FROM post WHERE id = $1;"
-	createQuery  = "INSERT INTO post (text, \"user\") VALUES ($1, $2) RETURNING id;"
+	getAllQuery         = "SELECT * FROM post;"
+	getByIdQuery        = "SELECT * FROM post WHERE id = $1;"
+	createQuery         = "INSERT INTO post (text, \"user\") VALUES ($1, $2) RETURNING id;"
+	deleteQuery         = "DELETE FROM post WHERE id = $1 RETURNING text, user;"
+	deleteUserPostQuery = "DELETE FROM post WHERE user = $1 RETURNING id, text;"
 )
 
 type pgPostRepository struct {
@@ -96,4 +98,56 @@ func (repository *pgPostRepository) CreatePost(ctx context.Context, post *entity
 		Text: post.Text,
 		User: post.User,
 	}, nil
+}
+
+func (repository *pgPostRepository) DeletePost(ctx context.Context, id int) (*entity.Post, error) {
+	var text string
+	var user int
+
+	err := repository.db.QueryRowContext(
+		ctx,
+		deleteQuery,
+		id,
+	).Scan(&text, &user)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &entity.Post{
+		Id:   id,
+		Text: text,
+		User: user,
+	}, nil
+}
+
+func (repository *pgPostRepository) DeletePostByUser(ctx context.Context, id int) ([]*entity.Post, error) {
+	rows, err := repository.db.QueryContext(
+		ctx,
+		deleteUserPostQuery,
+		id,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var posts []*entity.Post
+
+	for rows.Next() {
+		var postId int
+		var text string
+
+		if err = rows.Scan(&postId, &text); err != nil {
+			return nil, err
+		}
+
+		posts = append(posts, &entity.Post{
+			Id:   postId,
+			Text: text,
+			User: id,
+		})
+	}
+
+	return posts, nil
 }

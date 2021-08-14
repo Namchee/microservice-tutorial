@@ -46,8 +46,31 @@ services:
       - DB_HOST=postgres-post
       - DB_PORT=5432
       - DB_NAME=post
+      - USER_HOST=user
+      - USER_PORT=50051
     depends_on:
       - postgres-post
+  nsqlookupd:
+    image: nsqio/nsq
+    command: /nsqlookupd
+    ports:
+      - "4160:4160"
+      - "4161:4161"
+  nsqd:
+    image: nsqio/nsq
+    command:  /nsqd --broadcast-address=nsqd --lookupd-tcp-address=nsqlookupd:4160
+    depends_on:
+      - nsqlookupd
+    ports:
+      - "4151:4151"
+      - "4150:4150"
+  nsqadmin:
+    image: nsqio/nsq
+    command: /nsqadmin --lookupd-http-address=nsqlookupd:4161
+    depends_on:
+      - nsqlookupd  
+    ports:
+      - "4171:4171"
 
 volumes:
   db-data-user:
