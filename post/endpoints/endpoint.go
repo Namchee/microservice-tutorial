@@ -81,7 +81,7 @@ func makeDeletePostEndpoint(svc service.PostService) endpoint.Endpoint {
 
 func makeDeletePostByUserEndpoint(svc service.PostService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := int(request.(int32))
+		req := int(request.(int))
 		result, err := svc.DeletePostByUser(ctx, req)
 
 		if err != nil {

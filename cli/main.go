@@ -34,17 +34,38 @@ func main() {
 		log.Fatalln("failed to call user service")
 	}
 
-	var req *pbp.CreatePostRequest = &pbp.CreatePostRequest{
-		Text: "Hello World",
-		User: users.Data[len(users.Data)-1].Id,
+	if len(users.Data) > 0 {
+		log.Fatalln("wrong user database state")
 	}
 
-	inserted, err := postClient.CreatePost(context.Background(), req)
+	user, err := userClient.CreateUser(context.Background(), &pbu.CreateUserRequest{
+		Username: "namchee",
+		Name:     "Namchee",
+		Bio:      "Hello World",
+	})
 
 	if err != nil {
-		log.Fatalln(err.Error())
-		log.Fatalln("failed to call post service")
+		log.Fatalln("failed to insert user")
 	}
 
-	fmt.Println(inserted.Id)
+	id := user.Id
+
+	_, err = postClient.CreatePost(context.Background(), &pbp.CreatePostRequest{
+		Text: "This is a test post",
+		User: id,
+	})
+
+	if err != nil {
+		log.Fatalln("failed to insert new post")
+	}
+
+	deleted, err := userClient.DeleteUser(context.Background(), &pbu.DeleteUserRequest{
+		Id: id,
+	})
+
+	if err != nil {
+		log.Fatalln("failed to delete user")
+	}
+
+	fmt.Println(deleted.User.Id)
 }

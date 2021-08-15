@@ -1,18 +1,15 @@
 package main
 
 import (
-	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"net"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 
 	"github.com/Namchee/microservice-tutorial/post/endpoints"
-	"github.com/Namchee/microservice-tutorial/post/entity"
+	"github.com/Namchee/microservice-tutorial/post/mq"
 	"github.com/Namchee/microservice-tutorial/post/pb"
 	"github.com/Namchee/microservice-tutorial/post/repository"
 	"github.com/Namchee/microservice-tutorial/post/service"
@@ -28,7 +25,7 @@ import (
 
 const (
 	messageTopic   = "post"
-	messageChannel = "chan"
+	messageChannel = "channel"
 )
 
 func main() {
@@ -56,9 +53,8 @@ func main() {
 	}
 	userClient := upb.NewUserServiceClient(userConn)
 
-	lookupAddres := fmt.Sprintf("%s:%s", os.Getenv("LOOKUP_HOST"), os.Getenv("LOOKUP_PORT"))
-	consumer, _ := nsq.NewConsumer(messageTopic, messageChannel, &nsq.Config{})
-	err = consumer.ConnectToNSQD(lookupAddres)
+	lookupAddress := fmt.Sprintf("%s:%s", os.Getenv("LOOKUP_HOST"), os.Getenv("LOOKUP_PORT"))
+	consumer, _ := nsq.NewConsumer(messageTopic, messageChannel, nsq.NewConfig())
 
 	if err != nil {
 		level.Error(logger).Log("err", "failed to connect to message queue")
@@ -72,25 +68,15 @@ func main() {
 	postEndpoints := endpoints.NewPostEndpoint(postService)
 	grpcServer := transports.NewGRPCServer(postEndpoints)
 
-	consumer.AddHandler(nsq.HandlerFunc(func(message *nsq.Message) error {
-		var msg *entity.Message
+	consumer.AddHandler(&mq.MessageHandler{
+		Endpoints: postEndpoints,
+	})
+	err = consumer.ConnectToNSQLookupd(lookupAddress)
 
-		err := json.Unmarshal(message.Body, &msg)
-
-		if err != nil {
-			return err
-		}
-
-		user, err := strconv.ParseInt(msg.Content, 10, 32)
-
-		_, err = postEndpoints.DeletePostByUser(context.Background(), user)
-
-		if err != nil {
-			return err
-		}
-
-		return nil
-	}))
+	if err != nil {
+		level.Error(logger).Log("err", "failed to connect to lookup service")
+		os.Exit(1)
+	}
 
 	errs := make(chan error)
 	c := make(chan os.Signal)

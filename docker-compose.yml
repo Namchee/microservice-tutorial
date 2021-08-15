@@ -12,6 +12,8 @@ services:
       - POSTGRES_USER=namchee
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=users
+    networks: 
+      - backend
   postgres-post:
     build: 
       context: .
@@ -24,6 +26,8 @@ services:
       - POSTGRES_USER=namchee
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=post
+    networks: 
+      - backend
   user:
     build: ./user
     ports:
@@ -34,8 +38,14 @@ services:
       - DB_HOST=postgres-user
       - DB_PORT=5432
       - DB_NAME=users
+      - NSQ_HOST=nsqd
+      - NSQ_PORT=4150
     depends_on:
       - postgres-user
+      - nsqlookupd
+      - nsqd
+    networks: 
+      - backend
   post:
     build: ./post
     ports:
@@ -48,14 +58,22 @@ services:
       - DB_NAME=post
       - USER_HOST=user
       - USER_PORT=50051
+      - LOOKUP_HOST=nsqlookupd
+      - LOOKUP_PORT=4161
     depends_on:
       - postgres-post
+      - nsqlookupd
+      - nsqd
+    networks: 
+      - backend
   nsqlookupd:
     image: nsqio/nsq
     command: /nsqlookupd
     ports:
       - "4160:4160"
       - "4161:4161"
+    networks: 
+      - backend
   nsqd:
     image: nsqio/nsq
     command:  /nsqd --broadcast-address=nsqd --lookupd-tcp-address=nsqlookupd:4160
@@ -64,6 +82,8 @@ services:
     ports:
       - "4151:4151"
       - "4150:4150"
+    networks: 
+      - backend
   nsqadmin:
     image: nsqio/nsq
     command: /nsqadmin --lookupd-http-address=nsqlookupd:4161
@@ -71,9 +91,14 @@ services:
       - nsqlookupd  
     ports:
       - "4171:4171"
+    networks: 
+      - backend
 
 volumes:
   db-data-user:
     driver: local
   db-data-post:
     driver: local
+
+networks: 
+  backend:
