@@ -10,44 +10,58 @@ import (
 
 	"github.com/Namchee/microservice-tutorial/user/endpoints"
 	"github.com/Namchee/microservice-tutorial/user/entity"
+	"github.com/go-kit/kit/log"
 	httptransport "github.com/go-kit/kit/transport/http"
 )
 
 type httpResponse struct {
-	data interface{} `json:"data"`
-	err  string      `json:"error"`
+	Data interface{} `json:"data"`
+	Err  string      `json:"error"`
 }
 
-type httpServer struct {
-	getUsers    httptransport.Server
-	getUserById httptransport.Server
-	createUser  httptransport.Server
-	deleteUser  httptransport.Server
-}
-
-func NewHTTPServer(endpoints endpoints.UserEndpoints) httpServer {
-	return &httpServer{
-		getUsers: httptransport.NewServer(
-			endpoints.GetUsers,
-			decodeGetUsersHTTPRequest,
-			encodeGetUsersHTTPResponse,
-		),
-		getUserById: httptransport.NewServer(
-			endpoints.GetUserById,
-			decodeGetUserByIdRequest,
-			encodeGetUserByIdResponse,
-		),
-		createUser: httptransport.NewServer(
-			endpoints.CreateUser,
-			decodeCreateUserRequest,
-			encodeCreateUserResponse,
-		),
-		deleteUser: httptransport.NewServer(
-			endpoints.DeleteUser,
-			decodeDeleteUserRequest,
-			encodeDeleteUserResponse,
-		),
+func NewHTTPRouter(endpoints *endpoints.UserEndpoints, logger log.Logger) *mux.Router {
+	options := []httptransport.ServerOption{
+		httptransport.ServerErrorLogger(logger),
+		httptransport.ServerErrorEncoder(encodeErrorResponse),
 	}
+
+	getUsersHandler := httptransport.NewServer(
+		endpoints.GetUsers,
+		decodeGetUsersHTTPRequest,
+		encodeHTTPResponse,
+		options...,
+	)
+
+	getUserByIdHandler := httptransport.NewServer(
+		endpoints.GetUserById,
+		decodeGetUserByIdHTTPRequest,
+		encodeHTTPResponse,
+		options...,
+	)
+
+	createUserHandler := httptransport.NewServer(
+		endpoints.CreateUser,
+		decodeCreateUserHTTPRequest,
+		encodeHTTPResponse,
+		options...,
+	)
+
+	deleteUserHandler := httptransport.NewServer(
+		endpoints.DeleteUser,
+		decodeDeleteUserHTTPRequest,
+		encodeHTTPResponse,
+		options...,
+	)
+
+	router := mux.NewRouter()
+	apiRouter := router.PathPrefix("/api").Subrouter()
+
+	apiRouter.Methods("GET").Path("/users").Handler(getUsersHandler)
+	apiRouter.Methods("GET").Path("/user/{id:[0-9]+}").Handler(getUserByIdHandler)
+	apiRouter.Methods("POST").Path("/user").Handler(createUserHandler)
+	apiRouter.Methods("DELETE").Path("/user/{id:[0-9]+}").Handler(deleteUserHandler)
+
+	return router
 }
 
 func encodeErrorResponse(_ context.Context, err error, w http.ResponseWriter) {
@@ -58,8 +72,8 @@ func encodeErrorResponse(_ context.Context, err error, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(500) // just give it 500 for now
 	json.NewEncoder(w).Encode(httpResponse{
-		data: nil,
-		err:  err.Error(),
+		Data: nil,
+		Err:  err.Error(),
 	})
 }
 
@@ -68,7 +82,7 @@ func encodeHTTPResponse(_ context.Context, w http.ResponseWriter, res interface{
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(httpResponse{
-		data: res,
+		Data: res,
 	})
 }
 
@@ -76,16 +90,27 @@ func decodeGetUsersHTTPRequest(_ context.Context, request *http.Request) (interf
 	limitRaw := request.URL.Query().Get("limit")
 	offsetRaw := request.URL.Query().Get("offset")
 
-	limit, err := strconv.Atoi(limitRaw)
+	limit := 0
+	offset := 0
 
-	if err != nil {
-		return nil, err
+	if len(limitRaw) > 0 {
+		lim, err := strconv.Atoi(limitRaw)
+
+		if err != nil {
+			return nil, err
+		}
+
+		limit = lim
 	}
 
-	offset, err := strconv.Atoi(offsetRaw)
+	if len(offsetRaw) > 0 {
+		off, err := strconv.Atoi(offsetRaw)
 
-	if err != nil {
-		return nil, err
+		if err != nil {
+			return nil, err
+		}
+
+		offset = off
 	}
 
 	return &entity.Pagination{
@@ -95,71 +120,37 @@ func decodeGetUsersHTTPRequest(_ context.Context, request *http.Request) (interf
 }
 
 func decodeGetUserByIdHTTPRequest(_ context.Context, request *http.Request) (interface{}, error) {
-	req := mux.Vars(request)
-	return req.Id, nil
-}
+	params := mux.Vars(request)
+	id := params["id"]
 
-/*
+	num, err := strconv.Atoi(id)
 
-func encodeGetUserByIdResponse(_ context.Context, response interface{}) (interface{}, error) {
-	res := response.(*entity.User)
-	var data *pb.User
-
-	if res != nil {
-		data = &pb.User{
-			Id:       int32(res.Id),
-			Username: res.Username,
-			Name:     res.Name,
-			Bio:      res.Bio,
-		}
+	if err != nil {
+		return nil, err
 	}
 
-	return &pb.GetUserByIdResponse{
-		Data: data,
-	}, nil
+	return int32(num), nil
 }
 
-func decodeCreateUserRequest(_ context.Context, request interface{}) (interface{}, error) {
-	req := request.(*pb.CreateUserRequest)
+func decodeCreateUserHTTPRequest(_ context.Context, request *http.Request) (interface{}, error) {
+	var user *entity.User
 
-	return &entity.User{
-		Username: req.Username,
-		Name:     req.Name,
-		Bio:      req.Bio,
-	}, nil
-}
-
-func encodeCreateUserResponse(_ context.Context, response interface{}) (interface{}, error) {
-	res := response.(*entity.User)
-
-	return &pb.User{
-		Id:       int32(res.Id),
-		Username: res.Username,
-		Name:     res.Name,
-		Bio:      res.Bio,
-	}, nil
-}
-
-func decodeDeleteUserRequest(_ context.Context, request interface{}) (interface{}, error) {
-	req := request.(*pb.DeleteUserRequest)
-	return req.Id, nil
-}
-
-func encodeDeleteUserResponse(_ context.Context, response interface{}) (interface{}, error) {
-	res := response.(*entity.User)
-	var user *pb.User
-
-	if res != nil {
-		user = &pb.User{
-			Id:       int32(res.Id),
-			Username: res.Username,
-			Name:     res.Name,
-			Bio:      res.Bio,
-		}
+	if err := json.NewDecoder(request.Body).Decode(&user); err != nil {
+		return nil, err
 	}
 
-	return &pb.DeleteUserResponse{
-		User: user,
-	}, nil
+	return user, nil
 }
-*/
+
+func decodeDeleteUserHTTPRequest(_ context.Context, request *http.Request) (interface{}, error) {
+	params := mux.Vars(request)
+	id := params["id"]
+
+	num, err := strconv.Atoi(id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return int32(num), nil
+}

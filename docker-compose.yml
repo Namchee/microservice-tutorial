@@ -32,6 +32,7 @@ services:
     build: ./user
     ports:
       - "50051:50051"
+      - "8080:8080"
     environment:
       - DB_USER=namchee
       - DB_PASSWORD=postgres
@@ -50,6 +51,7 @@ services:
     build: ./post
     ports:
       - "50052:50051"
+      - "8081:8080"
     environment:
       - DB_USER=namchee
       - DB_PASSWORD=postgres

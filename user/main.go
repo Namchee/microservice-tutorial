@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -48,7 +49,6 @@ func main() {
 	userService = service.NewLoggingMiddleware(logger)(userService)
 	publisher := service.NewNSQPublisher(producer)
 	userEndpoint := endpoints.NewUserEndpoint(logger, userService, publisher)
-	grpcServer := transports.NewGRPCServer(userEndpoint)
 
 	errs := make(chan error)
 	c := make(chan os.Signal)
@@ -57,11 +57,19 @@ func main() {
 		errs <- fmt.Errorf("%s", <-c)
 	}()
 
+	grpcServer := transports.NewGRPCServer(userEndpoint)
 	grpcListener, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		level.Error(logger).Log("failed to open grpc server")
 		os.Exit(1)
 	}
+	httpRouter := transports.NewHTTPRouter(userEndpoint, logger)
+	httpServer := http.Server{
+		Addr:    ":8080",
+		Handler: httpRouter,
+	}
+
+	httpServer.ListenAndServe()
 
 	go func() {
 		baseServer := grpc.NewServer()

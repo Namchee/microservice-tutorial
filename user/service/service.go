@@ -16,7 +16,3 @@ type UserService interface {
 type PublisherService interface {
 	Publish(context.Context, *entity.Message) error
 }
-
-type ConsumerService interface {
-	Consume(context.Context, *entity.Message) error
-}
