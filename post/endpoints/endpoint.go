@@ -41,7 +41,7 @@ func makeGetPostsEndpoint(svc service.PostService) endpoint.Endpoint {
 
 func makeGetPostByIdEndpoint(svc service.PostService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		id := int(request.(int32))
+		id := request.(int)
 
 		result, err := svc.GetPostById(ctx, id)
 
@@ -68,7 +68,7 @@ func makeCreatePostEndpoint(svc service.PostService) endpoint.Endpoint {
 
 func makeDeletePostEndpoint(svc service.PostService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := int(request.(int32))
+		req := request.(int)
 		result, err := svc.DeletePost(ctx, req)
 
 		if err != nil {
@@ -81,7 +81,7 @@ func makeDeletePostEndpoint(svc service.PostService) endpoint.Endpoint {
 
 func makeDeletePostByUserEndpoint(svc service.PostService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := int(request.(int))
+		req := request.(int)
 		result, err := svc.DeletePostByUser(ctx, req)
 
 		if err != nil {

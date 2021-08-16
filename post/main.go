@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -66,6 +67,14 @@ func main() {
 	postService = service.NewPostServiceProxy(userClient)(postService)
 	postService = service.NewPostLoggingMiddleware(logger)(postService)
 	postEndpoints := endpoints.NewPostEndpoint(postService)
+
+	errs := make(chan error)
+	c := make(chan os.Signal)
+	go func() {
+		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGALRM)
+		errs <- fmt.Errorf("%s", <-c)
+	}()
+
 	grpcServer := transports.NewGRPCServer(postEndpoints)
 
 	consumer.AddHandler(&mq.MessageHandler{
@@ -78,16 +87,22 @@ func main() {
 		os.Exit(1)
 	}
 
-	errs := make(chan error)
-	c := make(chan os.Signal)
-	go func() {
-		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGALRM)
-		errs <- fmt.Errorf("%s", <-c)
-	}()
-
 	grpcListener, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		level.Error(logger).Log("msg", "failed to start grpc server")
+		os.Exit(1)
+	}
+
+	httpListener := transports.NewHTTPRouter(postEndpoints, logger)
+	httpServer := http.Server{
+		Addr:    ":8080",
+		Handler: httpListener,
+	}
+
+	err = httpServer.ListenAndServe()
+
+	if err != nil {
+		level.Error(logger).Log("err", "failed to start http server")
 		os.Exit(1)
 	}
 
