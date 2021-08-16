@@ -117,7 +117,7 @@ func encodeGetUsersResponse(_ context.Context, response interface{}) (interface{
 
 func decodeGetUserByIdRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(*pb.GetUserByIdRequest)
-	return req.Id, nil
+	return int(req.Id), nil
 }
 
 func encodeGetUserByIdResponse(_ context.Context, response interface{}) (interface{}, error) {
@@ -161,7 +161,7 @@ func encodeCreateUserResponse(_ context.Context, response interface{}) (interfac
 
 func decodeDeleteUserRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(*pb.DeleteUserRequest)
-	return req.Id, nil
+	return int(req.Id), nil
 }
 
 func encodeDeleteUserResponse(_ context.Context, response interface{}) (interface{}, error) {

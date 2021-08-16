@@ -42,7 +42,7 @@ func makeGetUsersEndpoint(svc service.UserService) endpoint.Endpoint {
 
 func makeGetUserByIdEndpoint(svc service.UserService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		result, err := svc.GetUserById(ctx, int(request.(int32)))
+		result, err := svc.GetUserById(ctx, request.(int))
 
 		if err != nil {
 			return nil, err
@@ -67,7 +67,7 @@ func makeCreateUserEndpoint(svc service.UserService) endpoint.Endpoint {
 
 func makeDeleteUserEndpoint(svc service.UserService, mq service.PublisherService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		result, err := svc.DeleteUser(ctx, int(request.(int32)))
+		result, err := svc.DeleteUser(ctx, request.(int))
 
 		if err != nil {
 			return nil, err

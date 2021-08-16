@@ -129,7 +129,7 @@ func decodeGetUserByIdHTTPRequest(_ context.Context, request *http.Request) (int
 		return nil, err
 	}
 
-	return int32(num), nil
+	return num, nil
 }
 
 func decodeCreateUserHTTPRequest(_ context.Context, request *http.Request) (interface{}, error) {
@@ -152,5 +152,5 @@ func decodeDeleteUserHTTPRequest(_ context.Context, request *http.Request) (inte
 		return nil, err
 	}
 
-	return int32(num), nil
+	return num, nil
 }
