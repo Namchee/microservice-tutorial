@@ -63,17 +63,16 @@ func main() {
 	}
 
 	repository := repository.NewPgPostRepository(db)
-	postService := service.NewPostService(repository)
+
+	var postService service.PostService
+	postService = service.NewPostService(repository)
 	postService = service.NewPostServiceProxy(userClient)(postService)
 	postService = service.NewPostLoggingMiddleware(logger)(postService)
+
 	postEndpoints := endpoints.NewPostEndpoint(postService)
 
 	errs := make(chan error)
 	c := make(chan os.Signal)
-	go func() {
-		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGALRM)
-		errs <- fmt.Errorf("%s", <-c)
-	}()
 
 	grpcServer := transports.NewGRPCServer(postEndpoints)
 
@@ -81,7 +80,6 @@ func main() {
 		Endpoints: postEndpoints,
 	})
 	err = consumer.ConnectToNSQLookupd(lookupAddress)
-
 	if err != nil {
 		level.Error(logger).Log("err", "failed to connect to lookup service")
 		os.Exit(1)
@@ -99,18 +97,25 @@ func main() {
 		Handler: httpListener,
 	}
 
-	err = httpServer.ListenAndServe()
-
-	if err != nil {
-		level.Error(logger).Log("err", "failed to start http server")
-		os.Exit(1)
-	}
-
 	go func() {
 		baseServer := grpc.NewServer()
 		pb.RegisterPostServiceServer(baseServer, grpcServer)
 		level.Info(logger).Log("msg", "server started successfully 🚀")
 		baseServer.Serve(grpcListener)
+	}()
+
+	go func() {
+		err = httpServer.ListenAndServe()
+
+		if err != nil {
+			level.Error(logger).Log("err", "failed to start http server")
+			os.Exit(1)
+		}
+	}()
+
+	go func() {
+		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGALRM)
+		errs <- fmt.Errorf("%s", <-c)
 	}()
 
 	level.Error(logger).Log("exit", <-errs)

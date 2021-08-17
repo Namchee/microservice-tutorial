@@ -19,7 +19,7 @@ type pgPostRepository struct {
 	db *sql.DB
 }
 
-func NewPgPostRepository(db *sql.DB) PostRepository {
+func NewPgPostRepository(db *sql.DB) *pgPostRepository {
 	return &pgPostRepository{
 		db: db,
 	}
