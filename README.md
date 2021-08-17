@@ -8,6 +8,7 @@ My personal repository to record my journey on learning how to build a microserv
 - [x] Clean architecture
 - [x] Database per service
 - [x] gRPC and HTTP server
+- [x] Async communication with message queuing, powered with NSQ
 - [x] Graceful shutdowns
 - [x] Instrumentation with Prometheus and Grafana (partial)
 - [x] [Unit Test Example](./user/service/service_test.go) (partial)
