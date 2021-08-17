@@ -93,7 +93,7 @@ func decodeGetUsersHTTPRequest(_ context.Context, request *http.Request) (interf
 	limitRaw := request.URL.Query().Get("limit")
 	offsetRaw := request.URL.Query().Get("offset")
 
-	limit := 0
+	limit := 1
 	offset := 0
 
 	if len(limitRaw) > 0 {

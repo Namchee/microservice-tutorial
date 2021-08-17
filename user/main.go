@@ -43,7 +43,9 @@ func main() {
 	}
 
 	repository := repository.NewPgUserRepository(db)
-	userService := service.NewUserService(repository)
+
+	var userService service.UserService
+	userService = service.NewUserService(repository)
 	userService = service.NewLoggingMiddleware(logger)(userService)
 
 	requestCount := prometheus.NewCounter(prometheus.CounterOpts{

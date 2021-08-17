@@ -77,7 +77,7 @@ func (s *gRPCServer) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) 
 func decodeGetUsersRequest(_ context.Context, request interface{}) (interface{}, error) {
 	req := request.(*pb.GetUsersRequest)
 
-	limit := 0
+	limit := 1
 	offset := 0
 
 	if req.Limit != nil {
