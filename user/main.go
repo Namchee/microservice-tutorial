@@ -17,6 +17,7 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/nsqio/go-nsq"
+	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
 
 	_ "github.com/lib/pq"
@@ -44,6 +45,19 @@ func main() {
 	repository := repository.NewPgUserRepository(db)
 	userService := service.NewUserService(repository)
 	userService = service.NewLoggingMiddleware(logger)(userService)
+
+	requestCount := prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "get_users_request_count",
+		Help: "The total number of calls to GetUsers",
+	})
+	requestLatency := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Name: "get_users_request_count",
+		Help: "The total number of calls to GetUsers",
+	}, []string{"time"})
+	prometheus.Register(requestCount)
+	prometheus.Register(requestLatency)
+	userService = service.NewInstrumentationMiddleware(requestCount, *requestLatency)(userService)
+
 	publisher := service.NewNSQPublisher(producer)
 	userEndpoint := endpoints.NewUserEndpoint(logger, userService, publisher)
 

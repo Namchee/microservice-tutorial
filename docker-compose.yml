@@ -45,6 +45,7 @@ services:
       - postgres-user
       - nsqlookupd
       - nsqd
+      - prometheus
     networks: 
       - backend
   post:
@@ -66,6 +67,7 @@ services:
       - postgres-post
       - nsqlookupd
       - nsqd
+      - prometheus
     networks: 
       - backend
   nsqlookupd:
@@ -93,6 +95,20 @@ services:
       - nsqlookupd  
     ports:
       - "4171:4171"
+    networks: 
+      - backend
+  prometheus:
+    image: prom/prometheus
+    volumes: 
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks: 
+      - backend
+  grafana:
+    image: grafana/grafana
+    ports:
+      - 3000:3000
     networks: 
       - backend
 

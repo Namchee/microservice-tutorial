@@ -26,9 +26,7 @@ func NewInstrumentationMiddleware(count prometheus.Counter, latency prometheus.H
 }
 
 func (mw *prometheusMiddleware) GetUsers(ctx context.Context, pagination *entity.Pagination) ([]*entity.User, error) {
-	timer := prometheus.NewTimer(prometheus.ObserverFunc(func(v float64) {
-		mw.requestLatency.WithLabelValues("").Observe(v)
-	}))
+	timer := prometheus.NewTimer(mw.requestLatency.WithLabelValues("time"))
 	defer func() {
 		mw.requestCount.Inc()
 		timer.ObserveDuration()
