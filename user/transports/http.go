@@ -12,6 +12,7 @@ import (
 	"github.com/Namchee/microservice-tutorial/user/entity"
 	"github.com/go-kit/kit/log"
 	httptransport "github.com/go-kit/kit/transport/http"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type httpResponse struct {
@@ -54,6 +55,8 @@ func NewHTTPRouter(endpoints *endpoints.UserEndpoints, logger log.Logger) *mux.R
 	)
 
 	router := mux.NewRouter()
+	router.Handle("/metrics", promhttp.Handler())
+
 	apiRouter := router.PathPrefix("/api").Subrouter()
 
 	apiRouter.Methods("GET").Path("/users").Handler(getUsersHandler)
