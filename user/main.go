@@ -48,17 +48,17 @@ func main() {
 	userService = service.NewUserService(repository)
 	userService = service.NewLoggingMiddleware(logger)(userService)
 
-	requestCount := prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "get_users_request_count",
-		Help: "The total number of calls to GetUsers",
-	})
+	requestCount := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "request_count",
+		Help: "The total number of calls for each services",
+	}, []string{"path"})
 	requestLatency := prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Name: "get_users_request_count",
-		Help: "The total number of calls to GetUsers",
-	}, []string{"time"})
+		Name: "request_latency",
+		Help: "The latency for each services call",
+	}, []string{"path"})
 	prometheus.Register(requestCount)
 	prometheus.Register(requestLatency)
-	userService = service.NewInstrumentationMiddleware(requestCount, *requestLatency)(userService)
+	userService = service.NewInstrumentationMiddleware(*requestCount, *requestLatency)(userService)
 
 	publisher := service.NewNSQPublisher(producer)
 	userEndpoint := endpoints.NewUserEndpoint(logger, userService, publisher)
