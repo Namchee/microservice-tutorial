@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	ErrOutOfRangeLimit  = errors.New("`limit` must be a positive integer")
-	ErrOutOfRangeOffset = errors.New("`offset` must be an integer bigger than -1")
-	ErrOutOfRangeId     = errors.New("`id` must be a positive integer")
+	ErrLimitOutOfRange  = errors.New("`limit` must be a positive integer")
+	ErrOffsetOutOfRange = errors.New("`offset` must be an integer bigger than -1")
+	ErrIDOutOfRange     = errors.New("`id` must be a positive integer")
 )
 
 type postService struct {
@@ -26,11 +26,11 @@ func NewPostService(repository repository.PostRepository) *postService {
 
 func (svc *postService) GetPosts(ctx context.Context, pagination *entity.Pagination) ([]*entity.Post, error) {
 	if pagination.Limit < 1 {
-		return nil, ErrOutOfRangeLimit
+		return nil, ErrLimitOutOfRange
 	}
 
 	if pagination.Offset < 0 {
-		return nil, ErrOutOfRangeOffset
+		return nil, ErrOffsetOutOfRange
 	}
 
 	posts, err := svc.repository.GetPosts(ctx, pagination)
@@ -44,7 +44,7 @@ func (svc *postService) GetPosts(ctx context.Context, pagination *entity.Paginat
 
 func (svc *postService) GetPostById(ctx context.Context, id int) (*entity.Post, error) {
 	if id < 1 {
-		return nil, ErrOutOfRangeId
+		return nil, ErrIDOutOfRange
 	}
 
 	post, err := svc.repository.GetPostById(ctx, id)
@@ -57,6 +57,10 @@ func (svc *postService) GetPostById(ctx context.Context, id int) (*entity.Post, 
 }
 
 func (svc *postService) CreatePost(ctx context.Context, data *entity.Post) (*entity.Post, error) {
+	if data.User < 1 {
+		return nil, ErrIDOutOfRange
+	}
+
 	post, err := svc.repository.CreatePost(ctx, data)
 
 	if err != nil {
@@ -68,7 +72,7 @@ func (svc *postService) CreatePost(ctx context.Context, data *entity.Post) (*ent
 
 func (svc *postService) DeletePost(ctx context.Context, postId int) (*entity.Post, error) {
 	if postId < 0 {
-		return nil, ErrOutOfRangeId
+		return nil, ErrIDOutOfRange
 	}
 
 	post, err := svc.repository.DeletePost(ctx, postId)
@@ -81,6 +85,10 @@ func (svc *postService) DeletePost(ctx context.Context, postId int) (*entity.Pos
 }
 
 func (svc *postService) DeletePostByUser(ctx context.Context, userId int) ([]*entity.Post, error) {
+	if userId < 1 {
+		return nil, ErrIDOutOfRange
+	}
+	
 	posts, err := svc.repository.DeletePostByUser(ctx, userId)
 
 	if err != nil {
