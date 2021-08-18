@@ -10,5 +10,5 @@ My personal repository to record my journey on learning how to build a microserv
 - [x] gRPC and HTTP server
 - [x] Async communication with message queuing, powered with NSQ
 - [x] Graceful shutdowns
-- [x] Instrumentation with Prometheus and Grafana (partial)
-- [x] [Unit Test Example](./user/service/service_test.go) (partial)
+- [x] Instrumentation with Prometheus and Grafana
+- [x] Sample Unit Test, run with `go test -v ./...` on each services
